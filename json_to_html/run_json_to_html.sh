@@ -8,7 +8,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PYTHON_SCRIPT="${SCRIPT_DIR}/json_to_html.py"
 
 # Default input file (if not specified)
-DEFAULT_INPUT="../llm/exp_result/turbo_output_kg/predict_dev.json"
+DEFAULT_INPUT="../llm/exp_result/gpt52_output_kg/predict_dev.json"
 
 # Check parameters
 if [ -z "$1" ]; then
@@ -67,10 +67,10 @@ EVAL_RESULTS_FILE=""
 INPUT_DIR=$(dirname "${INPUT_FILE}")
 if [ -f "${INPUT_DIR}/eval_results.json" ]; then
     EVAL_RESULTS_FILE="${INPUT_DIR}/eval_results.json"
-elif [ -f "../llm/exp_result/turbo_output_kg/eval_results.json" ]; then
-    EVAL_RESULTS_FILE="../llm/exp_result/turbo_output_kg/eval_results.json"
-elif [ -f "../llm/exp_result/turbo_output/eval_results.json" ]; then
-    EVAL_RESULTS_FILE="../llm/exp_result/turbo_output/eval_results.json"
+elif [ -f "../llm/exp_result/gpt52_output_kg/eval_results.json" ]; then
+    EVAL_RESULTS_FILE="../llm/exp_result/gpt52_output_kg/eval_results.json"
+elif [ -f "../llm/exp_result/gpt52_output/eval_results.json" ]; then
+    EVAL_RESULTS_FILE="../llm/exp_result/gpt52_output/eval_results.json"
 fi
 
 # Build command

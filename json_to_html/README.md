@@ -15,11 +15,11 @@
 ```bash
 cd json_to_html
 
-# 使用默认文件（../llm/exp_result/turbo_output_kg/predict_dev.json）
+# 使用默认文件（../llm/exp_result/gpt52_output_kg/predict_dev.json）
 ./run_json_to_html.sh
 
 # 指定输入文件
-./run_json_to_html.sh ../llm/exp_result/turbo_output/predict_dev.json
+./run_json_to_html.sh ../llm/exp_result/gpt52_output/predict_dev.json
 
 # 指定输入和输出文件
 ./run_json_to_html.sh input.json output.html
@@ -31,7 +31,7 @@ cd json_to_html
 cd json_to_html
 
 # 基本用法
-python3 json_to_html.py --input ../llm/exp_result/turbo_output_kg/predict_dev.json
+python3 json_to_html.py --input ../llm/exp_result/gpt52_output_kg/predict_dev.json
 
 # 指定输出文件
 python3 json_to_html.py -i input.json -o output.html

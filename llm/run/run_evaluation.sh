@@ -1,8 +1,8 @@
 db_root_path='./data/dev_databases/'
 data_mode='dev'
 diff_json_path='./data/dev.json'
-predicted_sql_path_kg='./exp_result/turbo_output_kg/'
-predicted_sql_path='./exp_result/turbo_output/'
+predicted_sql_path_kg='./exp_result/gpt52_output_kg/'
+predicted_sql_path='./exp_result/gpt52_output/'
 ground_truth_path='./data/'
 num_cpus=16
 meta_time_out=30.0

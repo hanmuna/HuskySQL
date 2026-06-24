@@ -42,47 +42,19 @@ The dataset contains the main following resources:
   - `evidence`: the external knowledge evidence annotated by experts for assistance of models or SQL annotators.
   - `SQL`: SQLs annotated by crowdsource referring to database descriptions, database contents, to answer the questions accurately.
 - `ground-truth SQL file`: The SQL file should be stored at [`./llm/data/dev_gold.sql`](./llm/data/dev_gold.sql).
-- `llm`: It contains source codes to convert texts to SQLs by calling APIs from LLMs, such as `code-davinci-002`, `gpt-3.5-turbo`.
-- `finetuning`: It contains the codes for supervised fine-tuning T5, a prevalent sequence-to-sequence pre-trained language model, to perform text-to-SQL task in BIRD.
-
-## Fine-tuning (FT)
-
-### Environment Setup:
-
-To train T5 via an end-to-end FT method, please first create enviroments following [`UnifiedSKG`](https://github.com/HKUNLP/UnifiedSKG).
-You may also need to download the third party packages for evaluations:
-
-```bash
-git submodule update --init --recursive
-```
-
-```bash
-cd ./finetuning/
-conda env create -f finetuning
-conda activate finetuning
-# install the hugginface package: datasets according to your version.
-pip install datasets
-# The following line to be replaced depending on your cuda version.
-pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
-```
-
-### Training:
-
-All parameters and attempts are stored in the [`./finetuning/run/`](./finetuning/run/). Please start training by the following commands:
-
-```bash
-sh ./run/run_bird_large.sh
-```
+- `llm`: It contains source codes to convert texts to SQLs by calling APIs from LLMs (currently set up for GPT-5.2 via the AI/ML API gateway), plus [`./llm/error_analysis/`](./llm/error_analysis/), a structured pipeline for generating, evaluating, and doing clause-level error analysis on full dev-set runs.
 
 ## In-Context Learning (ICL):
 
 ### Environment Setup:
 
-First, you need install openai in your python environment by:
-
 ```bash
-pip install openai
+cd ./llm/
+uv venv .venv --python 3.11
+uv pip install --python .venv -r requirements.txt
 ```
+
+Put your model API key in `./llm/run/.env` or `./llm/run/.env.local` (`AIMLAPI_API_KEY=...`); these files are gitignored.
 
 ### Collect results
 
@@ -93,11 +65,26 @@ cd ./llm/
 sh ./run/run_gpt.sh
 ```
 
+### Structured error analysis
+
+[`./llm/error_analysis/`](./llm/error_analysis/) runs the same generate → evaluate steps over the full dev set and adds clause-level structural diffing (predicted vs. gold SQL) plus an HTML report. See [`./llm/error_analysis/METHODOLOGY.md`](./llm/error_analysis/METHODOLOGY.md). Needs its own `./llm/error_analysis/.env` (`OPENAI_API_KEY` + `OPENAI_BASE_URL` pointed at the AI/ML API gateway) — see `.env.example` in that folder.
+
+```bash
+cd ./llm/
+.venv/bin/python error_analysis/01_generate.py   # --limit N for a smoke test
+.venv/bin/python error_analysis/02_evaluate.py
+.venv/bin/python error_analysis/03_analyze_wrong.py
+.venv/bin/python error_analysis/04_analyze_gold.py
+.venv/bin/python error_analysis/05_compare_report.py
+.venv/bin/python error_analysis/06_pairwise.py
+.venv/bin/python error_analysis/build_report.py  # -> error_analysis/report.html
+```
+
 ## Evaluation:
 
 ### Execution (EX) Evaluation:
 
-Please post-process your collected results as the format: SQL and its `db_id`, which is splitted by `'\t----- bird -----\t'`. The examples are shown in the [`./llm/exp_result/turbo_output/predict_dev.json`](./llm/exp_result/turbo_output/predict_dev.json). Put the ground-truth sql file in the [`./data/`](./data/). And you may need to design a ChatGPT tag by your own.
+Please post-process your collected results as the format: SQL and its `db_id`, which is splitted by `'\t----- bird -----\t'` (see `predict_dev.json` written by [`./llm/run/run_gpt.sh`](./llm/run/run_gpt.sh) for a live example). Put the ground-truth sql file in the [`./data/`](./data/). And you may need to design a ChatGPT tag by your own.
 The main file for ex evaluation is located at [`./llm/src/evaluation.py`](./llm/src/evaluation.py). \
 Then you could evaluate the results by the following command line :
 
