@@ -1,8 +1,8 @@
-"""Step 1b: per-instance execution-accuracy evaluation of the subset.
+"""Step 1b: per-instance execution-accuracy evaluation over the full dev set.
 
-Reuses evaluation/evaluation_utils.py:execute_sql (run pred & gold, set-compare).
+Reuses llm/src/evaluation.py:execute_sql (run pred & gold, set-compare).
 Output: outputs/eval_results.jsonl  (one row per question, with passed flag)
-Prints overall EX + by-difficulty breakdown (target ~55%).
+Prints overall EX + by-difficulty breakdown.
 """
 import os
 import sys
