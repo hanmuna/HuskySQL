@@ -1,5 +1,5 @@
 #!/bin/bash
-# 激活 conda 环境（如果存在）
+# Activate conda environment (if present)
 if [ -f "/opt/homebrew/anaconda3/bin/activate" ]; then
     source /opt/homebrew/anaconda3/bin/activate cv
 fi
@@ -20,7 +20,7 @@ if [ -f "$(dirname "$0")/.env.local" ]; then
     source "$(dirname "$0")/.env.local"
 fi
 if [ -z "$AIMLAPI_API_KEY" ]; then
-    echo "❌ 请先 export AIMLAPI_API_KEY=你的key，或写到 llm/run/.env 或 llm/run/.env.local"
+    echo "❌ Please export AIMLAPI_API_KEY=your_key first, or set it in llm/run/.env or llm/run/.env.local"
     exit 1
 fi
 YOUR_API_KEY="$AIMLAPI_API_KEY"
@@ -32,16 +32,16 @@ engine3='gpt-5.2'
 # data_output_path='./exp_result/gpt_output/'
 # data_kg_output_path='./exp_result/gpt_output_kg/'
 
-# 使用新的输出目录避免覆盖旧结果
+# Use a new output directory to avoid overwriting old results
 data_output_path='./exp_result/gpt52_output/'
 data_kg_output_path='./exp_result/gpt52_output_kg/'
 
 
-# 设置测试数据量（设置为 0 或注释掉则处理全部数据）
-TEST_LIMIT=0  # 测试前50条，设置为 0 处理全部数据
+# Set the number of test rows (0 = process all data; override via the TEST_LIMIT env var)
+TEST_LIMIT=${TEST_LIMIT:-0}
 
 if [ "$TEST_LIMIT" -gt 0 ]; then
-    echo "⚠️  测试模式: 只处理前 ${TEST_LIMIT} 条数据"
+    echo "⚠️  Test mode: only processing the first ${TEST_LIMIT} rows"
     LIMIT_ARG="--limit ${TEST_LIMIT}"
 else
     LIMIT_ARG=""
