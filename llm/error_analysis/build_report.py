@@ -1,11 +1,15 @@
-"""Generate report.html: ALL 136 failures, grouped by difficulty (tabs) then by
-auto-classified error category (collapsible cases). Deterministic, no API.
+"""Generate report.html: all failures, grouped by difficulty (tabs) then by
+auto-classified error category (collapsible cases). The gallery + AST clause
+stats are deterministic; the RA/BNF lens bullets and root-cause paragraph come
+from outputs/insights.json (run 07_synthesize_insights.py first) and are
+grounded in real idx examples from this run, not hand-written.
 
 Run: python3 error_analysis/build_report.py
 """
 import os
 import re
 import sys
+import json
 import html
 from collections import Counter
 
@@ -113,20 +117,61 @@ def case_html(idx, ev, pred, gold, diffs, p_only, g_only):
 """
 
 
-def main():
-    w = {x["idx"]: x for x in common.read_jsonl(os.path.join(common.OUT_DIR, "wrong_pred_analysis.jsonl"))}
-    g = {x["idx"]: x for x in common.read_jsonl(os.path.join(common.OUT_DIR, "gold_analysis.jsonl"))}
-    ev = {x["idx"]: x for x in common.read_jsonl(os.path.join(common.OUT_DIR, "eval_results.jsonl"))}
-
-    # bucket[difficulty][category] = list of case html
-    bucket = {d: {} for d, _ in DIFFS}
-    counts = {d: 0 for d, _ in DIFFS}
+def categorize_failures(w, g):
+    """idx -> {diffs, p_only, g_only, cat} for every failed prediction in w/g.
+    Shared by build_report.py (renders cases) and 07_synthesize_insights.py
+    (picks representative examples) so the classification logic lives in one place.
+    """
+    out = {}
     for idx, pr in w.items():
         gd = g[idx]
         diffs = sql_struct.diff_categories(pr["fingerprint"], gd["fingerprint"]) if not pr.get("parse_error") else []
         p_only = Counter(pr["productions"]) - Counter(gd["productions"])
         g_only = Counter(gd["productions"]) - Counter(pr["productions"])
         cat = FINE_TO_COARSE[classify(pr, gd, diffs, p_only, g_only)]
+        out[idx] = {"diffs": diffs, "p_only": p_only, "g_only": g_only, "cat": cat}
+    return out
+
+
+def load_insights():
+    path = os.path.join(common.OUT_DIR, "insights.json")
+    if not os.path.exists(path):
+        return None
+    return json.load(open(path))
+
+
+def clause_bars_html(clause_pct, n=7):
+    items = sorted(clause_pct.items(), key=lambda kv: -kv[1])[:n]
+    rows = []
+    for name, pct in items:
+        rows.append(
+            f'      <li><span class="bn">{html.escape(name)}</span>'
+            f'<span class="bar"><i style="width:{min(pct,100):.0f}%"></i></span>'
+            f'<span class="bp">{pct:.1f}%</span></li>'
+        )
+    return "\n".join(rows)
+
+
+def bullets_html(bullets):
+    return "\n".join(f"      <li>{html.escape(b)}</li>" for b in bullets)
+
+
+def main():
+    w = {x["idx"]: x for x in common.read_jsonl(os.path.join(common.OUT_DIR, "wrong_pred_analysis.jsonl"))}
+    g = {x["idx"]: x for x in common.read_jsonl(os.path.join(common.OUT_DIR, "gold_analysis.jsonl"))}
+    ev = {x["idx"]: x for x in common.read_jsonl(os.path.join(common.OUT_DIR, "eval_results.jsonl"))}
+    insights = load_insights()
+
+    n_total_diff = Counter(r["difficulty"] for r in ev.values())
+    cats = categorize_failures(w, g)
+
+    # bucket[difficulty][category] = list of case html
+    bucket = {d: {} for d, _ in DIFFS}
+    counts = {d: 0 for d, _ in DIFFS}
+    for idx, pr in w.items():
+        gd = g[idx]
+        c = cats[idx]
+        diffs, p_only, g_only, cat = c["diffs"], c["p_only"], c["g_only"], c["cat"]
         d = ev[idx]["difficulty"]
         bucket[d].setdefault(cat, []).append((idx, case_html(idx, ev[idx], pr, gd, diffs, p_only, g_only)))
         counts[d] += 1
@@ -164,10 +209,32 @@ def main():
         for d, lbl in DIFFS
     )
 
+    n_total = len(ev)
+    n_failed = len(w)
+    ex_overall = 100 * (n_total - n_failed) / n_total
+    ex_by_diff = {
+        d: 100 * (n_total_diff[d] - counts[d]) / n_total_diff[d] if n_total_diff[d] else 0.0
+        for d, _ in DIFFS
+    }
+
+    if insights:
+        ra_bullets = bullets_html(insights.get("ra_bullets", []))
+        bnf_bullets = bullets_html(insights.get("bnf_bullets", []))
+        root_cause = html.escape(insights.get("root_cause", ""))
+        clause_bars = clause_bars_html(insights.get("clause_pct", {}))
+    else:
+        ra_bullets = bnf_bullets = '      <li class="sub">Run 07_synthesize_insights.py to populate this.</li>'
+        root_cause = "Run <code>07_synthesize_insights.py</code> to populate a data-grounded root-cause summary."
+        clause_bars = '      <li class="sub">No clause data — run 05_compare_report.py first.</li>'
+
     htmldoc = TEMPLATE.format(
         tabbar=tabbar,
         panes="\n".join(panes),
         n_simple=counts["simple"], n_mod=counts["moderate"], n_hard=counts["challenging"],
+        n_total=n_total, n_failed=n_failed, ex_overall=ex_overall,
+        ex_simple=ex_by_diff["simple"], ex_mod=ex_by_diff["moderate"], ex_hard=ex_by_diff["challenging"],
+        q_simple=n_total_diff["simple"], q_mod=n_total_diff["moderate"], q_hard=n_total_diff["challenging"],
+        ra_bullets=ra_bullets, bnf_bullets=bnf_bullets, root_cause=root_cause, clause_bars=clause_bars,
     )
     out = os.path.join(common.OUT_DIR, "..", "report.html")
     out = os.path.abspath(out)
@@ -182,7 +249,7 @@ def main():
 TEMPLATE = """<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GPT-5.2 Text-to-SQL Failure Gallery — BIRD Mini-Dev</title>
+<title>GPT-5.2 Text-to-SQL Failure Gallery — BIRD Full Dev</title>
 <style>
   :root{{--bg:#f6f7f9;--panel:#fff;--soft:#eef1f6;--line:#e4e8f0;--ink:#19202e;--mut:#646f85;
     --acc:#2f6fe0;--acc-soft:#eaf1fe;--pred:#c2410c;--pred-soft:#fdf1ec;--pred-line:#f3d4c4;
@@ -289,82 +356,60 @@ TEMPLATE = """<!DOCTYPE html>
 </style></head><body><div class="wrap">
 
 <header>
-  <span class="tag">BIRD Mini-Dev · Text-to-SQL Error Analysis</span>
+  <span class="tag">BIRD Full Dev · Text-to-SQL Error Analysis</span>
   <h1>GPT-5.2 failure gallery — every wrong query, grouped by cause</h1>
-  <p class="lead">All 136 failures from 282 BIRD Mini-Dev questions. Pick a difficulty tab, then expand
+  <p class="lead">All {n_failed} failures from {n_total} BIRD dev questions (with-knowledge run). Pick a difficulty tab, then expand
   any case to see the wrong prediction beside the gold query and the AST-node difference. Cases are
   auto-grouped by error category.</p>
   <div class="meta">
     <span class="chip">Model <b>gpt-5.2-chat-latest</b></span>
     <span class="chip">via <b>AIML API</b></span>
-    <span class="chip">EX <b>51.77%</b> · 146/282</span>
-    <span class="chip"><b>136</b> failures</span>
+    <span class="chip">EX <b>{ex_overall:.2f}%</b></span>
+    <span class="chip"><b>{n_failed}</b> / {n_total} failures</span>
   </div>
 </header>
 
 <h2>Result</h2><div class="h2sub">Accuracy by difficulty</div>
 <div class="grid">
-  <div class="card"><div class="k">Simple</div><div class="v">67.6<small>%</small></div><div class="sub">71 q · {n_simple} wrong</div></div>
-  <div class="card"><div class="k">Moderate</div><div class="v">47.3<small>%</small></div><div class="sub">150 q · {n_mod} wrong</div></div>
-  <div class="card"><div class="k">Challenging</div><div class="v">44.3<small>%</small></div><div class="sub">61 q · {n_hard} wrong</div></div>
-  <div class="card"><div class="k">Overall EX</div><div class="v">51.8<small>%</small></div><div class="sub">282 q · 136 wrong</div></div>
+  <div class="card"><div class="k">Simple</div><div class="v">{ex_simple:.1f}<small>%</small></div><div class="sub">{q_simple} q · {n_simple} wrong</div></div>
+  <div class="card"><div class="k">Moderate</div><div class="v">{ex_mod:.1f}<small>%</small></div><div class="sub">{q_mod} q · {n_mod} wrong</div></div>
+  <div class="card"><div class="k">Challenging</div><div class="v">{ex_hard:.1f}<small>%</small></div><div class="sub">{q_hard} q · {n_hard} wrong</div></div>
+  <div class="card"><div class="k">Overall EX</div><div class="v">{ex_overall:.1f}<small>%</small></div><div class="sub">{n_total} q · {n_failed} wrong</div></div>
 </div>
 
 <h2>Why these queries fail</h2><div class="h2sub">Read through three lenses — AST · RA · BNF</div>
 <p class="lead">The three structural views answer three different questions: the <b>AST clause-fingerprint</b>
 says <i>which clause</i> breaks, the <b>relational algebra</b> says <i>what diverged semantically</i>,
-and the <b>BNF derivation</b> says <i>which grammar production</i> the model over- or under-expanded.
-Read together they show the model gets the high-level plan right and fails on the last mile.</p>
+and the <b>BNF derivation</b> says <i>which grammar production</i> the model over- or under-expanded.</p>
 
 <div class="lensgrid">
   <div class="lens">
     <div class="lenshd"><span class="lenstag ast">AST · clause</span> Where it breaks</div>
-    <p>Errors cluster at the two ends of the query, not the heavy machinery. Across 136 failures
-    (a question can differ in several clauses):</p>
+    <p>Share of the {n_failed} failures whose clause-level fingerprint differs from gold in this
+    clause (a question can differ in several clauses, so this is not a partition):</p>
     <ul class="rankbars">
-      <li><span class="bn">SELECT</span><span class="bar"><i style="width:100%"></i></span><span class="bp">79.4%</span></li>
-      <li><span class="bn">WHERE</span><span class="bar"><i style="width:80%"></i></span><span class="bp">63.2%</span></li>
-      <li><span class="bn">JOIN</span><span class="bar"><i style="width:55%"></i></span><span class="bp">43.4%</span></li>
-      <li><span class="bn">FUNCTION</span><span class="bar"><i style="width:49%"></i></span><span class="bp">39.0%</span></li>
-      <li><span class="bn">SUBQUERY</span><span class="bar"><i style="width:37%"></i></span><span class="bp">29.4%</span></li>
-      <li><span class="bn">AGGREGATION</span><span class="bar"><i style="width:31%"></i></span><span class="bp">25.0%</span></li>
+{clause_bars}
     </ul>
-    <p class="sub">GROUP BY / HAVING / SET_OP all sit under 13% — the skeleton is usually right.</p>
   </div>
 
   <div class="lens">
     <div class="lenshd"><span class="lenstag ra">RA · semantic</span> What diverged</div>
-    <p>Side-by-side relational algebra shows the <i>intent</i> is usually close. Three recurring gaps:</p>
+    <p>Side-by-side relational algebra over real failing cases from this run:</p>
     <ul class="reasons">
-      <li><b>Over-projection · missing outer π.</b> <span class="cc">idx 4</span> gold projects only <code>year</code>;
-      pred also returns the <code>SUBSTR(Date)</code> key and the <code>SUM</code> value — extra columns. (drives SELECT #1)</li>
-      <li><b>Wrong γ granularity / derived value.</b> <span class="cc">idx 5</span> gold groups by <code>month</code> and filters
-      <code>year='2013'</code>; pred groups by full <code>Date</code> and uses a <code>BETWEEN</code> string range.</li>
-      <li><b>Equivalent-but-different aggregation.</b> <span class="cc">idx 9</span> gold uses one pass of
-      <code>SUM(IIF(...))</code>; pred subtracts two <code>COUNT(*)</code> subqueries — logically equal, but it
-      mis-cased <code>'discount'</code> vs <code>'Discount'</code> and the result set breaks.</li>
+{ra_bullets}
     </ul>
   </div>
 
   <div class="lens">
     <div class="lenshd"><span class="lenstag bnf">BNF · grammar</span> How it errs</div>
-    <p>Top-level production sequences are nearly identical (<code>SELECT…FROM…WHERE…GROUP BY…ORDER BY…LIMIT</code>).
-    The divergence is in the <i>low-level</i> expansions:</p>
+    <p>Which grammar productions the model over- or under-expands relative to gold's derivation:</p>
     <ul class="reasons">
-      <li><code>&lt;proj&gt;</code> expands to extra terminals — superfluous <code>AS &lt;alias&gt;</code> and columns.</li>
-      <li><code>&lt;cond&gt;</code> picks <code>BETWEEN</code> / <code>≥ ∧ ≤</code> where gold uses <code>=</code> on a derived value.</li>
-      <li><code>&lt;agg&gt;</code> picks a <code>COUNT(*)</code> subquery composition over gold's <code>SUM(IIF(...))</code>.</li>
+{bnf_bullets}
     </ul>
-    <p class="sub">i.e. the model chooses a grammatically valid expansion — just not gold's.</p>
   </div>
 </div>
 
-<div class="caveat"><p><b>Root cause — the last mile, not the plan.</b> The high-level SQL plan (BNF top level, RA
-main structure) is usually correct. Failures concentrate on: <b>(1)</b> BIRD gold's terse output convention —
-the model over-returns helper/aggregate columns (SELECT = 79%); <b>(2)</b> insensitivity to the schema's real
-values/formats — case, date encoding, casts (inflates WHERE / FUNCTION / CAST); <b>(3)</b> EX counting only
-gold's phrasing, so a valid equivalent query still fails on a small literal bug. <b>Fix priority:</b> hard-constrain
-the output columns in the prompt and inject real value samples for the target columns.</p></div>
+<div class="caveat"><p><b>Root cause.</b> {root_cause}</p></div>
 
 <h2>Failure gallery</h2><div class="h2sub">Click a difficulty, then expand any case</div>
 <input class="tabin" type="radio" name="tab" id="t-s" checked>
@@ -375,13 +420,13 @@ the output columns in the prompt and inject real value samples for the target co
 {panes}
 </div>
 
-<div class="caveat"><p><b>⚠ Categories are auto-classified.</b> Each case is bucketed by deterministic
+<div class="caveat"><p><b>Categories are auto-classified.</b> Each case is bucketed by deterministic
 heuristics over the predicted-vs-gold structural diff (clause fingerprint + AST node difference).
 They flag the <i>most likely</i> cause; BIRD gold's terse house style means a single value bug can
-still light up several clauses. Confirm against <code>pairwise_comparison.md</code>.</p></div>
+still light up several clauses.</p></div>
 
 <footer>Generated by <code>error_analysis/build_report.py</code> from <code>outputs/</code> ·
-GPT-5.2 via AIML API · EX 51.77% over 282 BIRD Mini-Dev SQLite questions · 136 failures.</footer>
+GPT-5.2 via AIML API · EX {ex_overall:.2f}% over {n_total} BIRD dev SQLite questions · {n_failed} failures.</footer>
 </div></body></html>"""
 
 
