@@ -1,0 +1,1374 @@
+{
+ "tables": [
+  "frpm",
+  "satscores",
+  "schools"
+ ],
+ "columns_by_table": {
+  "frpm": [
+   "CDSCode",
+   "Academic Year",
+   "County Code",
+   "District Code",
+   "School Code",
+   "County Name",
+   "District Name",
+   "School Name",
+   "District Type",
+   "School Type",
+   "Educational Option Type",
+   "NSLP Provision Status",
+   "Charter School (Y/N)",
+   "Charter School Number",
+   "Charter Funding Type",
+   "IRC",
+   "Low Grade",
+   "High Grade",
+   "Enrollment (K-12)",
+   "Free Meal Count (K-12)",
+   "Percent (%) Eligible Free (K-12)",
+   "FRPM Count (K-12)",
+   "Percent (%) Eligible FRPM (K-12)",
+   "Enrollment (Ages 5-17)",
+   "Free Meal Count (Ages 5-17)",
+   "Percent (%) Eligible Free (Ages 5-17)",
+   "FRPM Count (Ages 5-17)",
+   "Percent (%) Eligible FRPM (Ages 5-17)",
+   "2013-14 CALPADS Fall 1 Certification Status"
+  ],
+  "satscores": [
+   "cds",
+   "rtype",
+   "sname",
+   "dname",
+   "cname",
+   "enroll12",
+   "NumTstTakr",
+   "AvgScrRead",
+   "AvgScrMath",
+   "AvgScrWrite",
+   "NumGE1500"
+  ],
+  "schools": [
+   "CDSCode",
+   "NCESDist",
+   "NCESSchool",
+   "StatusType",
+   "County",
+   "District",
+   "School",
+   "Street",
+   "StreetAbr",
+   "City",
+   "Zip",
+   "State",
+   "MailStreet",
+   "MailStrAbr",
+   "MailCity",
+   "MailZip",
+   "MailState",
+   "Phone",
+   "Ext",
+   "Website",
+   "OpenDate",
+   "ClosedDate",
+   "Charter",
+   "CharterNum",
+   "FundingType",
+   "DOC",
+   "DOCType",
+   "SOC",
+   "SOCType",
+   "EdOpsCode",
+   "EdOpsName",
+   "EILCode",
+   "EILName",
+   "GSoffered",
+   "GSserved",
+   "Virtual",
+   "Magnet",
+   "Latitude",
+   "Longitude",
+   "AdmFName1",
+   "AdmLName1",
+   "AdmEmail1",
+   "AdmFName2",
+   "AdmLName2",
+   "AdmEmail2",
+   "AdmFName3",
+   "AdmLName3",
+   "AdmEmail3",
+   "LastUpdate"
+  ]
+ },
+ "fks": [
+  {
+   "from": "frpm.CDSCode",
+   "to": "schools.CDSCode"
+  },
+  {
+   "from": "satscores.cds",
+   "to": "schools.CDSCode"
+  }
+ ],
+ "join_paths": {
+  "frpm|satscores": [
+   "frpm",
+   "schools",
+   "satscores"
+  ],
+  "frpm|schools": [
+   "frpm",
+   "schools"
+  ],
+  "satscores|schools": [
+   "satscores",
+   "schools"
+  ]
+ },
+ "profile": {
+  "frpm.CDSCode": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 9986,
+   "enum": null
+  },
+  "frpm.Academic Year": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1,
+   "enum": [
+    "2014-2015"
+   ]
+  },
+  "frpm.County Code": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 58,
+   "enum": null
+  },
+  "frpm.District Code": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 1012,
+   "enum": null
+  },
+  "frpm.School Code": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 9942,
+   "enum": null
+  },
+  "frpm.County Name": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 58,
+   "enum": null
+  },
+  "frpm.District Name": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1000,
+   "enum": null
+  },
+  "frpm.School Name": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 8652,
+   "enum": null
+  },
+  "frpm.District Type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 8,
+   "enum": [
+    "County Office of Education (COE)",
+    "State Special Schools",
+    "Unified School District",
+    "Elementary School District",
+    "High School District",
+    "State Board of Education",
+    "Non-School Locations",
+    "Statewide Benefit Charter"
+   ]
+  },
+  "frpm.School Type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 17,
+   "enum": [
+    "K-12 Schools (Public)",
+    "High Schools (Public)",
+    "Elementary Schools (Public)",
+    "Juvenile Court Schools",
+    "County Community",
+    "State Special Schools",
+    "Alternative Schools of Choice",
+    "Intermediate/Middle Schools (Public)",
+    "Continuation High Schools",
+    "Special Education Schools (Public)",
+    "Elemen Schools In 1 School Dist. (Public)",
+    "District Community Day Schools",
+    "Preschool",
+    "Junior High Schools (Public)",
+    "Opportunity Schools",
+    "High Schools In 1 School Dist. (Public)",
+    "Youth Authority Facilities"
+   ]
+  },
+  "frpm.Educational Option Type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 12,
+   "enum": [
+    "Traditional",
+    "Juvenile Court School",
+    "County Community School",
+    "State Special School",
+    "Alternative School of Choice",
+    "Continuation School",
+    "Special Education School",
+    "Community Day School",
+    "Home and Hospital",
+    "Opportunity School",
+    "Youth Authority School",
+    "District Special Education Consortia School"
+   ]
+  },
+  "frpm.NSLP Provision Status": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 7,
+   "enum": [
+    "Breakfast Provision 2",
+    "Provision 2",
+    "CEP",
+    "Lunch Provision 2",
+    "Provision 1",
+    "Multiple Provision Types",
+    "Provision 3"
+   ]
+  },
+  "frpm.Charter School (Y/N)": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    1,
+    0
+   ]
+  },
+  "frpm.Charter School Number": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1152,
+   "enum": null
+  },
+  "frpm.Charter Funding Type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 3,
+   "enum": [
+    "Directly funded",
+    "Locally funded",
+    "Not in CS funding model"
+   ]
+  },
+  "frpm.IRC": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    1,
+    0
+   ]
+  },
+  "frpm.Low Grade": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 15,
+   "enum": [
+    "K",
+    "9",
+    "1",
+    "P",
+    "6",
+    "10",
+    "7",
+    "3",
+    "5",
+    "Adult",
+    "4",
+    "2",
+    "8",
+    "11",
+    "12"
+   ]
+  },
+  "frpm.High Grade": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 17,
+   "enum": [
+    "12",
+    "8",
+    "5",
+    "Adult",
+    "6",
+    "3",
+    "P",
+    "7",
+    "2",
+    "1",
+    "4",
+    "K",
+    "9",
+    "10",
+    "11",
+    "13",
+    "Post Secondary"
+   ]
+  },
+  "frpm.Enrollment (K-12)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 1882,
+   "enum": null
+  },
+  "frpm.Free Meal Count (K-12)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 1216,
+   "enum": null
+  },
+  "frpm.Percent (%) Eligible Free (K-12)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 8658,
+   "enum": null
+  },
+  "frpm.FRPM Count (K-12)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 1361,
+   "enum": null
+  },
+  "frpm.Percent (%) Eligible FRPM (K-12)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 8623,
+   "enum": null
+  },
+  "frpm.Enrollment (Ages 5-17)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 1845,
+   "enum": null
+  },
+  "frpm.Free Meal Count (Ages 5-17)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 1205,
+   "enum": null
+  },
+  "frpm.Percent (%) Eligible Free (Ages 5-17)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 8552,
+   "enum": null
+  },
+  "frpm.FRPM Count (Ages 5-17)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 1330,
+   "enum": null
+  },
+  "frpm.Percent (%) Eligible FRPM (Ages 5-17)": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 8557,
+   "enum": null
+  },
+  "frpm.2013-14 CALPADS Fall 1 Certification Status": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 1,
+   "enum": [
+    1
+   ]
+  },
+  "satscores.cds": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 2269,
+   "enum": null
+  },
+  "satscores.rtype": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    "D",
+    "S"
+   ]
+  },
+  "satscores.sname": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1665,
+   "enum": null
+  },
+  "satscores.dname": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 520,
+   "enum": null
+  },
+  "satscores.cname": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 57,
+   "enum": null
+  },
+  "satscores.enroll12": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 835,
+   "enum": null
+  },
+  "satscores.NumTstTakr": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 547,
+   "enum": null
+  },
+  "satscores.AvgScrRead": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 269,
+   "enum": null
+  },
+  "satscores.AvgScrMath": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 295,
+   "enum": null
+  },
+  "satscores.AvgScrWrite": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 267,
+   "enum": null
+  },
+  "satscores.NumGE1500": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 368,
+   "enum": null
+  },
+  "schools.CDSCode": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 17686,
+   "enum": null
+  },
+  "schools.NCESDist": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1193,
+   "enum": null
+  },
+  "schools.NCESSchool": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 12321,
+   "enum": null
+  },
+  "schools.StatusType": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 4,
+   "enum": [
+    "Active",
+    "Closed",
+    "Merged",
+    "Pending"
+   ]
+  },
+  "schools.County": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 58,
+   "enum": null
+  },
+  "schools.District": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1411,
+   "enum": null
+  },
+  "schools.School": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 13875,
+   "enum": null
+  },
+  "schools.Street": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 13593,
+   "enum": null
+  },
+  "schools.StreetAbr": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 13633,
+   "enum": null
+  },
+  "schools.City": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1165,
+   "enum": null
+  },
+  "schools.Zip": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 11184,
+   "enum": null
+  },
+  "schools.State": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1,
+   "enum": [
+    "CA"
+   ]
+  },
+  "schools.MailStreet": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 12395,
+   "enum": null
+  },
+  "schools.MailStrAbr": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 12429,
+   "enum": null
+  },
+  "schools.MailCity": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1132,
+   "enum": null
+  },
+  "schools.MailZip": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 10298,
+   "enum": null
+  },
+  "schools.MailState": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1,
+   "enum": [
+    "CA"
+   ]
+  },
+  "schools.Phone": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 10632,
+   "enum": null
+  },
+  "schools.Ext": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 379,
+   "enum": null
+  },
+  "schools.Website": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 4082,
+   "enum": null
+  },
+  "schools.OpenDate": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 1406,
+   "enum": null
+  },
+  "schools.ClosedDate": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 899,
+   "enum": null
+  },
+  "schools.Charter": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    1,
+    0
+   ]
+  },
+  "schools.CharterNum": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 1763,
+   "enum": null
+  },
+  "schools.FundingType": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 3,
+   "enum": [
+    "Directly funded",
+    "Locally funded",
+    "Not in CS funding model"
+   ]
+  },
+  "schools.DOC": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 12,
+   "enum": [
+    "00",
+    "31",
+    "34",
+    "42",
+    "54",
+    "56",
+    "52",
+    "58",
+    "98",
+    "02",
+    "99",
+    "03"
+   ]
+  },
+  "schools.DOCType": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 12,
+   "enum": [
+    "County Office of Education (COE)",
+    "State Special Schools",
+    "Non-School Locations",
+    "Joint Powers Authority (JPA)",
+    "Unified School District",
+    "High School District",
+    "Elementary School District",
+    "Community College District",
+    "Regional Occupation Center/Program (ROC/P)",
+    "State Board of Education",
+    "Administration Only",
+    "Statewide Benefit Charter"
+   ]
+  },
+  "schools.SOC": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 20,
+   "enum": [
+    "65",
+    "66",
+    "60",
+    "10",
+    "14",
+    "13",
+    "62",
+    "70",
+    "09",
+    "31",
+    "08",
+    "63",
+    "68",
+    "64",
+    "61",
+    "69",
+    "98",
+    "11",
+    "15",
+    "67"
+   ]
+  },
+  "schools.SOCType": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 20,
+   "enum": [
+    "K-12 Schools (Public)",
+    "High Schools (Public)",
+    "Elementary Schools (Public)",
+    "County Community",
+    "Juvenile Court Schools",
+    "Opportunity Schools",
+    "Intermediate/Middle Schools (Public)",
+    "Adult Education Centers",
+    "Special Education Schools (Public)",
+    "State Special Schools",
+    "Preschool",
+    "Alternative Schools of Choice",
+    "Continuation High Schools",
+    "Junior High Schools (Public)",
+    "Elemen Schools In 1 School Dist. (Public)",
+    "District Community Day Schools",
+    "ROC/ROP",
+    "Youth Authority Facilities",
+    "Other County Or District Programs",
+    "High Schools In 1 School Dist. (Public)"
+   ]
+  },
+  "schools.EdOpsCode": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 13,
+   "enum": [
+    "TRAD",
+    "JUV",
+    "COMM",
+    "OPP",
+    "SPEC",
+    "SSS",
+    "ALTSOC",
+    "CON",
+    "COMMDAY",
+    "HOMHOS",
+    "YTH",
+    "ROP",
+    "SPECON"
+   ]
+  },
+  "schools.EdOpsName": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 13,
+   "enum": [
+    "Traditional",
+    "Juvenile Court School",
+    "County Community School",
+    "Opportunity School",
+    "Special Education School",
+    "State Special School",
+    "Alternative School of Choice",
+    "Continuation School",
+    "Community Day School",
+    "Home and Hospital",
+    "Youth Authority School",
+    "ROP",
+    "District Special Education Consortia School"
+   ]
+  },
+  "schools.EILCode": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 7,
+   "enum": [
+    "ELEMHIGH",
+    "HS",
+    "ELEM",
+    "UG",
+    "INTMIDJR",
+    "PS",
+    "A"
+   ]
+  },
+  "schools.EILName": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 7,
+   "enum": [
+    "Elementary-High Combination",
+    "High School",
+    "Elementary",
+    "Ungraded",
+    "Intermediate/Middle/Junior High",
+    "Preschool",
+    "Adult"
+   ]
+  },
+  "schools.GSoffered": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 94,
+   "enum": null
+  },
+  "schools.GSserved": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 81,
+   "enum": null
+  },
+  "schools.Virtual": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 3,
+   "enum": [
+    "P",
+    "N",
+    "F"
+   ]
+  },
+  "schools.Magnet": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    0,
+    1
+   ]
+  },
+  "schools.Latitude": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 11436,
+   "enum": null
+  },
+  "schools.Longitude": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 11278,
+   "enum": null
+  },
+  "schools.AdmFName1": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 2327,
+   "enum": null
+  },
+  "schools.AdmLName1": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 6394,
+   "enum": null
+  },
+  "schools.AdmEmail1": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 10492,
+   "enum": null
+  },
+  "schools.AdmFName2": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 285,
+   "enum": null
+  },
+  "schools.AdmLName2": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 363,
+   "enum": null
+  },
+  "schools.AdmEmail2": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 382,
+   "enum": null
+  },
+  "schools.AdmFName3": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 40,
+   "enum": null
+  },
+  "schools.AdmLName3": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 42,
+   "enum": null
+  },
+  "schools.AdmEmail3": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 42,
+   "enum": null
+  },
+  "schools.LastUpdate": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 757,
+   "enum": null
+  }
+ },
+ "value_index": {
+  "2014-2015": [
+   "frpm.Academic Year"
+  ],
+  "county office of education (coe)": [
+   "frpm.District Type",
+   "schools.DOCType"
+  ],
+  "state special schools": [
+   "frpm.District Type",
+   "frpm.School Type",
+   "schools.DOCType",
+   "schools.SOCType"
+  ],
+  "unified school district": [
+   "frpm.District Type",
+   "schools.DOCType"
+  ],
+  "elementary school district": [
+   "frpm.District Type",
+   "schools.DOCType"
+  ],
+  "high school district": [
+   "frpm.District Type",
+   "schools.DOCType"
+  ],
+  "state board of education": [
+   "frpm.District Type",
+   "schools.DOCType"
+  ],
+  "non-school locations": [
+   "frpm.District Type",
+   "schools.DOCType"
+  ],
+  "statewide benefit charter": [
+   "frpm.District Type",
+   "schools.DOCType"
+  ],
+  "k-12 schools (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "high schools (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "elementary schools (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "juvenile court schools": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "county community": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "alternative schools of choice": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "intermediate/middle schools (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "continuation high schools": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "special education schools (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "elemen schools in 1 school dist. (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "district community day schools": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "preschool": [
+   "frpm.School Type",
+   "schools.SOCType",
+   "schools.EILName"
+  ],
+  "junior high schools (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "opportunity schools": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "high schools in 1 school dist. (public)": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "youth authority facilities": [
+   "frpm.School Type",
+   "schools.SOCType"
+  ],
+  "traditional": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "juvenile court school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "county community school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "state special school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "alternative school of choice": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "continuation school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "special education school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "community day school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "home and hospital": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "opportunity school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "youth authority school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "district special education consortia school": [
+   "frpm.Educational Option Type",
+   "schools.EdOpsName"
+  ],
+  "breakfast provision 2": [
+   "frpm.NSLP Provision Status"
+  ],
+  "provision 2": [
+   "frpm.NSLP Provision Status"
+  ],
+  "cep": [
+   "frpm.NSLP Provision Status"
+  ],
+  "lunch provision 2": [
+   "frpm.NSLP Provision Status"
+  ],
+  "provision 1": [
+   "frpm.NSLP Provision Status"
+  ],
+  "multiple provision types": [
+   "frpm.NSLP Provision Status"
+  ],
+  "provision 3": [
+   "frpm.NSLP Provision Status"
+  ],
+  "1": [
+   "frpm.Charter School (Y/N)",
+   "frpm.IRC",
+   "frpm.Low Grade",
+   "frpm.High Grade",
+   "frpm.2013-14 CALPADS Fall 1 Certification Status",
+   "schools.Charter",
+   "schools.Magnet"
+  ],
+  "0": [
+   "frpm.Charter School (Y/N)",
+   "frpm.IRC",
+   "schools.Charter",
+   "schools.Magnet"
+  ],
+  "directly funded": [
+   "frpm.Charter Funding Type",
+   "schools.FundingType"
+  ],
+  "locally funded": [
+   "frpm.Charter Funding Type",
+   "schools.FundingType"
+  ],
+  "not in cs funding model": [
+   "frpm.Charter Funding Type",
+   "schools.FundingType"
+  ],
+  "k": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "9": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "p": [
+   "frpm.Low Grade",
+   "frpm.High Grade",
+   "schools.Virtual"
+  ],
+  "6": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "10": [
+   "frpm.Low Grade",
+   "frpm.High Grade",
+   "schools.SOC"
+  ],
+  "7": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "3": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "5": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "adult": [
+   "frpm.Low Grade",
+   "frpm.High Grade",
+   "schools.EILName"
+  ],
+  "4": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "2": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "8": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "11": [
+   "frpm.Low Grade",
+   "frpm.High Grade",
+   "schools.SOC"
+  ],
+  "12": [
+   "frpm.Low Grade",
+   "frpm.High Grade"
+  ],
+  "13": [
+   "frpm.High Grade",
+   "schools.SOC"
+  ],
+  "post secondary": [
+   "frpm.High Grade"
+  ],
+  "d": [
+   "satscores.rtype"
+  ],
+  "s": [
+   "satscores.rtype"
+  ],
+  "active": [
+   "schools.StatusType"
+  ],
+  "closed": [
+   "schools.StatusType"
+  ],
+  "merged": [
+   "schools.StatusType"
+  ],
+  "pending": [
+   "schools.StatusType"
+  ],
+  "ca": [
+   "schools.State",
+   "schools.MailState"
+  ],
+  "00": [
+   "schools.DOC"
+  ],
+  "31": [
+   "schools.DOC",
+   "schools.SOC"
+  ],
+  "34": [
+   "schools.DOC"
+  ],
+  "42": [
+   "schools.DOC"
+  ],
+  "54": [
+   "schools.DOC"
+  ],
+  "56": [
+   "schools.DOC"
+  ],
+  "52": [
+   "schools.DOC"
+  ],
+  "58": [
+   "schools.DOC"
+  ],
+  "98": [
+   "schools.DOC",
+   "schools.SOC"
+  ],
+  "02": [
+   "schools.DOC"
+  ],
+  "99": [
+   "schools.DOC"
+  ],
+  "03": [
+   "schools.DOC"
+  ],
+  "joint powers authority (jpa)": [
+   "schools.DOCType"
+  ],
+  "community college district": [
+   "schools.DOCType"
+  ],
+  "regional occupation center/program (roc/p)": [
+   "schools.DOCType"
+  ],
+  "administration only": [
+   "schools.DOCType"
+  ],
+  "65": [
+   "schools.SOC"
+  ],
+  "66": [
+   "schools.SOC"
+  ],
+  "60": [
+   "schools.SOC"
+  ],
+  "14": [
+   "schools.SOC"
+  ],
+  "62": [
+   "schools.SOC"
+  ],
+  "70": [
+   "schools.SOC"
+  ],
+  "09": [
+   "schools.SOC"
+  ],
+  "08": [
+   "schools.SOC"
+  ],
+  "63": [
+   "schools.SOC"
+  ],
+  "68": [
+   "schools.SOC"
+  ],
+  "64": [
+   "schools.SOC"
+  ],
+  "61": [
+   "schools.SOC"
+  ],
+  "69": [
+   "schools.SOC"
+  ],
+  "15": [
+   "schools.SOC"
+  ],
+  "67": [
+   "schools.SOC"
+  ],
+  "adult education centers": [
+   "schools.SOCType"
+  ],
+  "roc/rop": [
+   "schools.SOCType"
+  ],
+  "other county or district programs": [
+   "schools.SOCType"
+  ],
+  "trad": [
+   "schools.EdOpsCode"
+  ],
+  "juv": [
+   "schools.EdOpsCode"
+  ],
+  "comm": [
+   "schools.EdOpsCode"
+  ],
+  "opp": [
+   "schools.EdOpsCode"
+  ],
+  "spec": [
+   "schools.EdOpsCode"
+  ],
+  "sss": [
+   "schools.EdOpsCode"
+  ],
+  "altsoc": [
+   "schools.EdOpsCode"
+  ],
+  "con": [
+   "schools.EdOpsCode"
+  ],
+  "commday": [
+   "schools.EdOpsCode"
+  ],
+  "homhos": [
+   "schools.EdOpsCode"
+  ],
+  "yth": [
+   "schools.EdOpsCode"
+  ],
+  "rop": [
+   "schools.EdOpsCode",
+   "schools.EdOpsName"
+  ],
+  "specon": [
+   "schools.EdOpsCode"
+  ],
+  "elemhigh": [
+   "schools.EILCode"
+  ],
+  "hs": [
+   "schools.EILCode"
+  ],
+  "elem": [
+   "schools.EILCode"
+  ],
+  "ug": [
+   "schools.EILCode"
+  ],
+  "intmidjr": [
+   "schools.EILCode"
+  ],
+  "ps": [
+   "schools.EILCode"
+  ],
+  "a": [
+   "schools.EILCode"
+  ],
+  "elementary-high combination": [
+   "schools.EILName"
+  ],
+  "high school": [
+   "schools.EILName"
+  ],
+  "elementary": [
+   "schools.EILName"
+  ],
+  "ungraded": [
+   "schools.EILName"
+  ],
+  "intermediate/middle/junior high": [
+   "schools.EILName"
+  ],
+  "n": [
+   "schools.Virtual"
+  ],
+  "f": [
+   "schools.Virtual"
+  ]
+ }
+}

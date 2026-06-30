@@ -1,0 +1,169 @@
+{
+ "tables": [
+  "atom",
+  "bond",
+  "connected",
+  "molecule"
+ ],
+ "columns_by_table": {
+  "atom": [
+   "atom_id",
+   "molecule_id",
+   "element"
+  ],
+  "bond": [
+   "bond_id",
+   "molecule_id",
+   "bond_type"
+  ],
+  "connected": [
+   "atom_id",
+   "atom_id2",
+   "bond_id"
+  ],
+  "molecule": [
+   "molecule_id",
+   "label"
+  ]
+ },
+ "fks": [
+  {
+   "from": "atom.molecule_id",
+   "to": "molecule.molecule_id"
+  },
+  {
+   "from": "bond.molecule_id",
+   "to": "molecule.molecule_id"
+  },
+  {
+   "from": "connected.bond_id",
+   "to": "bond.bond_id"
+  },
+  {
+   "from": "connected.atom_id2",
+   "to": "atom.atom_id"
+  },
+  {
+   "from": "connected.atom_id",
+   "to": "atom.atom_id"
+  }
+ ],
+ "join_paths": {
+  "atom|bond": [
+   "atom",
+   "molecule",
+   "bond"
+  ],
+  "atom|connected": [
+   "atom",
+   "connected"
+  ],
+  "atom|molecule": [
+   "atom",
+   "molecule"
+  ],
+  "bond|connected": [
+   "bond",
+   "connected"
+  ],
+  "bond|molecule": [
+   "bond",
+   "molecule"
+  ],
+  "connected|molecule": [
+   "connected",
+   "bond",
+   "molecule"
+  ]
+ },
+ "profile": {
+  "atom.atom_id": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 12333,
+   "enum": null
+  },
+  "atom.molecule_id": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 444,
+   "enum": null
+  },
+  "atom.element": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 21,
+   "enum": null
+  },
+  "bond.bond_id": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 12379,
+   "enum": null
+  },
+  "bond.molecule_id": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 444,
+   "enum": null
+  },
+  "bond.bond_type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 3,
+   "enum": [
+    "-",
+    "=",
+    "#"
+   ]
+  },
+  "connected.atom_id": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 12284,
+   "enum": null
+  },
+  "connected.atom_id2": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 12284,
+   "enum": null
+  },
+  "connected.bond_id": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 12379,
+   "enum": null
+  },
+  "molecule.molecule_id": {
+   "type": "TEXT",
+   "pk": true,
+   "ndistinct": 343,
+   "enum": null
+  },
+  "molecule.label": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    "+",
+    "-"
+   ]
+  }
+ },
+ "value_index": {
+  "-": [
+   "bond.bond_type",
+   "molecule.label"
+  ],
+  "=": [
+   "bond.bond_type"
+  ],
+  "#": [
+   "bond.bond_type"
+  ],
+  "+": [
+   "molecule.label"
+  ]
+ }
+}

@@ -1,0 +1,972 @@
+{
+ "tables": [
+  "account",
+  "card",
+  "client",
+  "disp",
+  "district",
+  "loan",
+  "order",
+  "trans"
+ ],
+ "columns_by_table": {
+  "account": [
+   "account_id",
+   "district_id",
+   "frequency",
+   "date"
+  ],
+  "card": [
+   "card_id",
+   "disp_id",
+   "type",
+   "issued"
+  ],
+  "client": [
+   "client_id",
+   "gender",
+   "birth_date",
+   "district_id"
+  ],
+  "disp": [
+   "disp_id",
+   "client_id",
+   "account_id",
+   "type"
+  ],
+  "district": [
+   "district_id",
+   "A2",
+   "A3",
+   "A4",
+   "A5",
+   "A6",
+   "A7",
+   "A8",
+   "A9",
+   "A10",
+   "A11",
+   "A12",
+   "A13",
+   "A14",
+   "A15",
+   "A16"
+  ],
+  "loan": [
+   "loan_id",
+   "account_id",
+   "date",
+   "amount",
+   "duration",
+   "payments",
+   "status"
+  ],
+  "order": [
+   "order_id",
+   "account_id",
+   "bank_to",
+   "account_to",
+   "amount",
+   "k_symbol"
+  ],
+  "trans": [
+   "trans_id",
+   "account_id",
+   "date",
+   "type",
+   "operation",
+   "amount",
+   "balance",
+   "k_symbol",
+   "bank",
+   "account"
+  ]
+ },
+ "fks": [
+  {
+   "from": "account.district_id",
+   "to": "district.district_id"
+  },
+  {
+   "from": "card.disp_id",
+   "to": "disp.disp_id"
+  },
+  {
+   "from": "client.district_id",
+   "to": "district.district_id"
+  },
+  {
+   "from": "disp.client_id",
+   "to": "client.client_id"
+  },
+  {
+   "from": "disp.account_id",
+   "to": "account.account_id"
+  },
+  {
+   "from": "loan.account_id",
+   "to": "account.account_id"
+  },
+  {
+   "from": "order.account_id",
+   "to": "account.account_id"
+  },
+  {
+   "from": "trans.account_id",
+   "to": "account.account_id"
+  }
+ ],
+ "join_paths": {
+  "account|card": [
+   "account",
+   "disp",
+   "card"
+  ],
+  "account|client": [
+   "account",
+   "district",
+   "client"
+  ],
+  "account|disp": [
+   "account",
+   "disp"
+  ],
+  "account|district": [
+   "account",
+   "district"
+  ],
+  "account|loan": [
+   "account",
+   "loan"
+  ],
+  "account|order": [
+   "account",
+   "order"
+  ],
+  "account|trans": [
+   "account",
+   "trans"
+  ],
+  "card|client": [
+   "card",
+   "disp",
+   "client"
+  ],
+  "card|disp": [
+   "card",
+   "disp"
+  ],
+  "card|district": [
+   "card",
+   "disp",
+   "client",
+   "district"
+  ],
+  "card|loan": [
+   "card",
+   "disp",
+   "account",
+   "loan"
+  ],
+  "card|order": [
+   "card",
+   "disp",
+   "account",
+   "order"
+  ],
+  "card|trans": [
+   "card",
+   "disp",
+   "account",
+   "trans"
+  ],
+  "client|disp": [
+   "client",
+   "disp"
+  ],
+  "client|district": [
+   "client",
+   "district"
+  ],
+  "client|loan": [
+   "client",
+   "district",
+   "account",
+   "loan"
+  ],
+  "client|order": [
+   "client",
+   "district",
+   "account",
+   "order"
+  ],
+  "client|trans": [
+   "client",
+   "district",
+   "account",
+   "trans"
+  ],
+  "disp|district": [
+   "disp",
+   "client",
+   "district"
+  ],
+  "disp|loan": [
+   "disp",
+   "account",
+   "loan"
+  ],
+  "disp|order": [
+   "disp",
+   "account",
+   "order"
+  ],
+  "disp|trans": [
+   "disp",
+   "account",
+   "trans"
+  ],
+  "district|loan": [
+   "district",
+   "account",
+   "loan"
+  ],
+  "district|order": [
+   "district",
+   "account",
+   "order"
+  ],
+  "district|trans": [
+   "district",
+   "account",
+   "trans"
+  ],
+  "loan|order": [
+   "loan",
+   "account",
+   "order"
+  ],
+  "loan|trans": [
+   "loan",
+   "account",
+   "trans"
+  ],
+  "order|trans": [
+   "order",
+   "account",
+   "trans"
+  ]
+ },
+ "profile": {
+  "account.account_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 4500,
+   "enum": null
+  },
+  "account.district_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 77,
+   "enum": null
+  },
+  "account.frequency": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 3,
+   "enum": [
+    "POPLATEK MESICNE",
+    "POPLATEK TYDNE",
+    "POPLATEK PO OBRATU"
+   ]
+  },
+  "account.date": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 1535,
+   "enum": null
+  },
+  "card.card_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 892,
+   "enum": null
+  },
+  "card.disp_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 892,
+   "enum": null
+  },
+  "card.type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 3,
+   "enum": [
+    "gold",
+    "classic",
+    "junior"
+   ]
+  },
+  "card.issued": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 607,
+   "enum": null
+  },
+  "client.client_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 5369,
+   "enum": null
+  },
+  "client.gender": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    "F",
+    "M"
+   ]
+  },
+  "client.birth_date": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 4738,
+   "enum": null
+  },
+  "client.district_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 77,
+   "enum": null
+  },
+  "disp.disp_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 5369,
+   "enum": null
+  },
+  "disp.client_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 5369,
+   "enum": null
+  },
+  "disp.account_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 4500,
+   "enum": null
+  },
+  "disp.type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 2,
+   "enum": [
+    "OWNER",
+    "DISPONENT"
+   ]
+  },
+  "district.district_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 77,
+   "enum": null
+  },
+  "district.A2": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 77,
+   "enum": null
+  },
+  "district.A3": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 8,
+   "enum": [
+    "Prague",
+    "central Bohemia",
+    "south Bohemia",
+    "west Bohemia",
+    "north Bohemia",
+    "east Bohemia",
+    "south Moravia",
+    "north Moravia"
+   ]
+  },
+  "district.A4": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 77,
+   "enum": null
+  },
+  "district.A5": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 53,
+   "enum": null
+  },
+  "district.A6": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 36,
+   "enum": null
+  },
+  "district.A7": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 17,
+   "enum": [
+    "0",
+    "6",
+    "4",
+    "1",
+    "7",
+    "9",
+    "10",
+    "2",
+    "3",
+    "5",
+    "8",
+    "18",
+    "14",
+    "20",
+    "13",
+    "11",
+    "12"
+   ]
+  },
+  "district.A8": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 6,
+   "enum": [
+    1,
+    2,
+    3,
+    0,
+    4,
+    5
+   ]
+  },
+  "district.A9": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 11,
+   "enum": [
+    1,
+    5,
+    6,
+    4,
+    8,
+    7,
+    2,
+    9,
+    10,
+    11,
+    3
+   ]
+  },
+  "district.A10": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 70,
+   "enum": null
+  },
+  "district.A11": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 76,
+   "enum": null
+  },
+  "district.A12": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 41,
+   "enum": null
+  },
+  "district.A13": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 73,
+   "enum": null
+  },
+  "district.A14": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 44,
+   "enum": null
+  },
+  "district.A15": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 75,
+   "enum": null
+  },
+  "district.A16": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 76,
+   "enum": null
+  },
+  "loan.loan_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 682,
+   "enum": null
+  },
+  "loan.account_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 682,
+   "enum": null
+  },
+  "loan.date": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 559,
+   "enum": null
+  },
+  "loan.amount": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 645,
+   "enum": null
+  },
+  "loan.duration": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 5,
+   "enum": [
+    24,
+    12,
+    60,
+    48,
+    36
+   ]
+  },
+  "loan.payments": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 577,
+   "enum": null
+  },
+  "loan.status": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 4,
+   "enum": [
+    "A",
+    "B",
+    "D",
+    "C"
+   ]
+  },
+  "order.order_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 6471,
+   "enum": null
+  },
+  "order.account_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 3758,
+   "enum": null
+  },
+  "order.bank_to": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 13,
+   "enum": [
+    "YZ",
+    "ST",
+    "QR",
+    "WX",
+    "CD",
+    "AB",
+    "UV",
+    "GH",
+    "IJ",
+    "KL",
+    "EF",
+    "MN",
+    "OP"
+   ]
+  },
+  "order.account_to": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 6446,
+   "enum": null
+  },
+  "order.amount": {
+   "type": "REAL",
+   "pk": false,
+   "ndistinct": 4412,
+   "enum": null
+  },
+  "order.k_symbol": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 5,
+   "enum": [
+    "SIPO",
+    "UVER",
+    "",
+    "POJISTNE",
+    "LEASING"
+   ]
+  },
+  "trans.trans_id": {
+   "type": "INTEGER",
+   "pk": true,
+   "ndistinct": 1056320,
+   "enum": null
+  },
+  "trans.account_id": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 4500,
+   "enum": null
+  },
+  "trans.date": {
+   "type": "DATE",
+   "pk": false,
+   "ndistinct": 2191,
+   "enum": null
+  },
+  "trans.type": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 3,
+   "enum": [
+    "PRIJEM",
+    "VYDAJ",
+    "VYBER"
+   ]
+  },
+  "trans.operation": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 5,
+   "enum": [
+    "VKLAD",
+    "PREVOD Z UCTU",
+    "PREVOD NA UCET",
+    "VYBER",
+    "VYBER KARTOU"
+   ]
+  },
+  "trans.amount": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 35890,
+   "enum": null
+  },
+  "trans.balance": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 111042,
+   "enum": null
+  },
+  "trans.k_symbol": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 8,
+   "enum": [
+    "SIPO",
+    "SLUZBY",
+    "UVER",
+    " ",
+    "POJISTNE",
+    "DUCHOD",
+    "UROK",
+    "SANKC. UROK"
+   ]
+  },
+  "trans.bank": {
+   "type": "TEXT",
+   "pk": false,
+   "ndistinct": 13,
+   "enum": [
+    "AB",
+    "YZ",
+    "ST",
+    "QR",
+    "WX",
+    "CD",
+    "UV",
+    "KL",
+    "GH",
+    "OP",
+    "IJ",
+    "EF",
+    "MN"
+   ]
+  },
+  "trans.account": {
+   "type": "INTEGER",
+   "pk": false,
+   "ndistinct": 7665,
+   "enum": null
+  }
+ },
+ "value_index": {
+  "poplatek mesicne": [
+   "account.frequency"
+  ],
+  "poplatek tydne": [
+   "account.frequency"
+  ],
+  "poplatek po obratu": [
+   "account.frequency"
+  ],
+  "gold": [
+   "card.type"
+  ],
+  "classic": [
+   "card.type"
+  ],
+  "junior": [
+   "card.type"
+  ],
+  "f": [
+   "client.gender"
+  ],
+  "m": [
+   "client.gender"
+  ],
+  "owner": [
+   "disp.type"
+  ],
+  "disponent": [
+   "disp.type"
+  ],
+  "prague": [
+   "district.A3"
+  ],
+  "central bohemia": [
+   "district.A3"
+  ],
+  "south bohemia": [
+   "district.A3"
+  ],
+  "west bohemia": [
+   "district.A3"
+  ],
+  "north bohemia": [
+   "district.A3"
+  ],
+  "east bohemia": [
+   "district.A3"
+  ],
+  "south moravia": [
+   "district.A3"
+  ],
+  "north moravia": [
+   "district.A3"
+  ],
+  "0": [
+   "district.A7",
+   "district.A8"
+  ],
+  "6": [
+   "district.A7",
+   "district.A9"
+  ],
+  "4": [
+   "district.A7",
+   "district.A8",
+   "district.A9"
+  ],
+  "1": [
+   "district.A7",
+   "district.A8",
+   "district.A9"
+  ],
+  "7": [
+   "district.A7",
+   "district.A9"
+  ],
+  "9": [
+   "district.A7",
+   "district.A9"
+  ],
+  "10": [
+   "district.A7",
+   "district.A9"
+  ],
+  "2": [
+   "district.A7",
+   "district.A8",
+   "district.A9"
+  ],
+  "3": [
+   "district.A7",
+   "district.A8",
+   "district.A9"
+  ],
+  "5": [
+   "district.A7",
+   "district.A8",
+   "district.A9"
+  ],
+  "8": [
+   "district.A7",
+   "district.A9"
+  ],
+  "18": [
+   "district.A7"
+  ],
+  "14": [
+   "district.A7"
+  ],
+  "20": [
+   "district.A7"
+  ],
+  "13": [
+   "district.A7"
+  ],
+  "11": [
+   "district.A7",
+   "district.A9"
+  ],
+  "12": [
+   "district.A7",
+   "loan.duration"
+  ],
+  "24": [
+   "loan.duration"
+  ],
+  "60": [
+   "loan.duration"
+  ],
+  "48": [
+   "loan.duration"
+  ],
+  "36": [
+   "loan.duration"
+  ],
+  "a": [
+   "loan.status"
+  ],
+  "b": [
+   "loan.status"
+  ],
+  "d": [
+   "loan.status"
+  ],
+  "c": [
+   "loan.status"
+  ],
+  "yz": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "st": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "qr": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "wx": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "cd": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "ab": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "uv": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "gh": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "ij": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "kl": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "ef": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "mn": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "op": [
+   "order.bank_to",
+   "trans.bank"
+  ],
+  "sipo": [
+   "order.k_symbol",
+   "trans.k_symbol"
+  ],
+  "uver": [
+   "order.k_symbol",
+   "trans.k_symbol"
+  ],
+  "": [
+   "order.k_symbol"
+  ],
+  "pojistne": [
+   "order.k_symbol",
+   "trans.k_symbol"
+  ],
+  "leasing": [
+   "order.k_symbol"
+  ],
+  "prijem": [
+   "trans.type"
+  ],
+  "vydaj": [
+   "trans.type"
+  ],
+  "vyber": [
+   "trans.type",
+   "trans.operation"
+  ],
+  "vklad": [
+   "trans.operation"
+  ],
+  "prevod z uctu": [
+   "trans.operation"
+  ],
+  "prevod na ucet": [
+   "trans.operation"
+  ],
+  "vyber kartou": [
+   "trans.operation"
+  ],
+  "sluzby": [
+   "trans.k_symbol"
+  ],
+  " ": [
+   "trans.k_symbol"
+  ],
+  "duchod": [
+   "trans.k_symbol"
+  ],
+  "urok": [
+   "trans.k_symbol"
+  ],
+  "sankc. urok": [
+   "trans.k_symbol"
+  ]
+ }
+}

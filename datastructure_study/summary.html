@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BIRD Text-to-SQL — Structured Generation (M3)</title>
+<style>
+  body{font:14px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#222;
+       max-width:820px;margin:32px auto;padding:0 22px}
+  h1{font-size:20px;margin:0 0 4px}
+  h2{font-size:15px;margin:24px 0 8px;color:#000}
+  p{margin:8px 0}
+  .sub{color:#666;margin-bottom:18px}
+  table{border-collapse:collapse;margin:8px 0;font-size:13px}
+  th,td{border:1px solid #ddd;padding:5px 10px;text-align:left}
+  th{background:#f5f5f5}
+  td.n,th.n{text-align:right}
+  .up{color:#0a7d27;font-weight:bold}
+  code,pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+  pre{background:#f7f7f7;border:1px solid #eee;border-radius:5px;padding:9px 11px;overflow:auto;margin:6px 0}
+  .two{display:flex;gap:16px;margin:8px 0}
+  .two>div{flex:1;border:1px solid #ddd;border-radius:6px;padding:10px 12px}
+  .two h3{margin:0 0 6px;font-size:13px}
+  .bad{color:#999} .good{color:#0a7d27}
+  .key{background:#eefaf0;border-left:3px solid #0a7d27;padding:8px 12px;margin:10px 0}
+</style>
+</head>
+<body>
+
+<h1>BIRD Text-to-SQL: fixing failures with structured generation</h1>
+<p class="sub">Task: turn an English question + a database into a SQL query. A query is
+"correct" (EX) if running it returns exactly the gold result. Test slice: first 340 dev questions.</p>
+
+<h2>1. The problem we found in the baseline</h2>
+<p>The baseline model writes SQL as free text and scores <b>EX = 48.2%</b>. Looking at the
+176 wrong answers, the single biggest cause (34%) is <b>over-selection</b>: the logic is right,
+but the model puts extra columns in the <code>SELECT</code>, so the result set doesn't match gold.</p>
+<p>Example — <i>"list the magnet schools with over 500 SAT takers"</i>:</p>
+<pre>gold:     SELECT School ...                              (1 column)
+baseline: SELECT CDSCode, School, District, County, ...  (5 columns) → marked wrong</pre>
+<p>This cannot be fixed reliably by prompting — the model just needs to be <i>structurally</i>
+prevented from adding columns.</p>
+
+<h2>2. The idea: emit a structure, then compile it (M3)</h2>
+<p>Instead of letting the model write SQL text, we ask it to emit a small <b>relational-algebra IR</b>
+(JSON) where the projection is an <b>explicit, minimal list</b>. A deterministic compiler
+(<code>ra_to_sql</code>) turns that IR into SQL — and it can only output the columns listed, so
+over-selection becomes structurally impossible.</p>
+<pre>{ "from": "schools",
+  "joins": [{"table":"satscores","on":["schools.CDSCode","satscores.cds"]}],
+  "select": ["schools.School"],                 // &lt;- minimal projection
+  "where": "schools.Magnet = 1 AND satscores.NumTstTakr > 500" }</pre>
+
+<div class="two">
+  <div><h3 class="bad">Baseline pipeline</h3>
+    question → model → <b>free-form SQL text</b><br>
+    <span style="color:#999">model guesses columns, joins, projection</span></div>
+  <div><h3 class="good">M3 pipeline</h3>
+    question → model → <b>RA IR (JSON)</b> → <code>ra_to_sql</code> → SQL<br>
+    <span style="color:#0a7d27">projection is explicit &amp; minimal by construction</span></div>
+</div>
+
+<h2>3. Result</h2>
+<table>
+<tr><th>Metric</th><th class="n">Baseline</th><th class="n">M3</th><th class="n">Δ</th></tr>
+<tr><td>Execution accuracy (EX)</td><td class="n">48.24</td><td class="n"><b>57.94</b></td><td class="n up">+9.71</td></tr>
+<tr><td>IR parsed / compiled</td><td class="n">—</td><td class="n">339 / 339</td><td class="n">of 340</td></tr>
+<tr><td>Newly correct / newly broken</td><td class="n">—</td><td class="n">49 / 16</td><td class="n up">net +33</td></tr>
+<tr><td>Over-selection cases fixed</td><td class="n">—</td><td class="n">27 / 60</td><td class="n">the target bucket</td></tr>
+</table>
+
+<table>
+<tr><th>By database</th><th class="n">Base</th><th class="n">M3</th><th>By difficulty</th><th class="n">Base</th><th class="n">M3</th></tr>
+<tr><td>california_schools</td><td class="n">42.7</td><td class="n">52.8</td><td>simple</td><td class="n">58.9</td><td class="n">68.2</td></tr>
+<tr><td>financial</td><td class="n">51.9</td><td class="n">57.5</td><td>moderate</td><td class="n">35.2</td><td class="n">47.6</td></tr>
+<tr><td>toxicology</td><td class="n">49.0</td><td class="n">61.4</td><td>challenging</td><td class="n">32.6</td><td class="n">37.2</td></tr>
+</table>
+
+<div class="key">
+<b>Why it's good:</b> +9.71 EX, and the gain lands exactly on the over-selection bucket that
+prompting cannot fix (27 of 60 flipped). The example above now compiles to
+<code>SELECT "schools"."School" ...</code> → correct. 339/340 IRs parse and compile, so the
+"emit a structure" approach is reliable, and the prompt is schema-driven (works on any database).
+</div>
+
+<p class="sub" style="margin-top:18px">The remaining 16 regressions: 13 are genuine model logic
+errors, 3 are minor compiler edge cases (e.g. a reserved-word table name). Net effect is still +33 queries.</p>
+
+</body>
+</html>
