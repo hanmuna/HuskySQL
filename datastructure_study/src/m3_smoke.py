@@ -6,19 +6,19 @@ import os, sys, json, re, sqlite3
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, "..", "llm", "src"))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "llm", "src"))
 import openai
 from gpt_request import connect_gpt           # reuse the AIML caller
 from ra_to_sql import ra_to_sql
-from m3_prompt import build_ir_prompt
+from m3_ir_prompt import build_ir_prompt
 
-DBR = os.path.join(HERE, "..", "llm", "data", "dev_databases")
+DBR = os.path.join(HERE, "..", "..", "llm", "data", "dev_databases")
 ENGINE = "gpt-5.2"
 IDXS = [6, 16, 1, 271, 180]
 
 
 def load_key():
-    env = os.path.join(HERE, "..", "llm", "run", ".env")
+    env = os.path.join(HERE, "..", "..", "llm", "run", ".env")
     for line in open(env):
         if line.startswith("AIMLAPI_API_KEY"):
             return line.split("=", 1)[1].strip().strip('"').strip("'")
@@ -55,7 +55,7 @@ def run(db, sql):
 
 def main():
     openai.api_key = load_key()
-    rows = {r["idx"]: r for r in json.load(open(os.path.join(HERE, "outputs", "results_340.json")))}
+    rows = {r["idx"]: r for r in json.load(open(os.path.join(HERE, "..", "outputs", "results_340.json")))}
     results = []
     for idx in IDXS:
         r = rows[idx]
@@ -84,7 +84,7 @@ def main():
         print(f"idx{idx:<4}[{r['db_id']:<18}] base_ex={r['ex_kg']} ir_ok={rec['ir_ok']} "
               f"compile={rec['compile_ok']} EX={rec['ex']}  {rec['err']}")
 
-    open(os.path.join(HERE, "outputs", "m3_smoke.json"), "w").write(
+    open(os.path.join(HERE, "..", "outputs", "m3_smoke.json"), "w").write(
         json.dumps(results, ensure_ascii=False, indent=1))
     nok = sum(x["ex"] for x in results)
     nbase = sum(x["baseline_ex"] for x in results)

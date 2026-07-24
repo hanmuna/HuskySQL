@@ -12,9 +12,9 @@ This is an UPPER BOUND (oracle picks the right columns); M3 still has to emit th
 import os, json, sqlite3, itertools
 
 HERE = os.path.dirname(__file__)
-DBR = os.path.join(HERE, "..", "llm", "data", "dev_databases")
-rows = json.load(open(os.path.join(HERE, "outputs", "results_340.json")))
-tax = json.load(open(os.path.join(HERE, "outputs", "kg_taxonomy.json")))
+DBR = os.path.join(HERE, "..", "..", "llm", "data", "dev_databases")
+rows = json.load(open(os.path.join(HERE, "..", "outputs", "results_340.json")))
+tax = json.load(open(os.path.join(HERE, "..", "outputs", "kg_taxonomy.json")))
 bucket_of = {idx: b for b, idxs in tax.items() for idx in idxs}
 
 

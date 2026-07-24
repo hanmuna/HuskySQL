@@ -8,14 +8,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, "..", "llm", "src"))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "llm", "src"))
 import openai
 from gpt_request import connect_gpt
 from ra_to_sql import ra_to_sql
-from m3_prompt import build_ir_prompt
+from m3_ir_prompt import build_ir_prompt
 
-DBR = os.path.join(HERE, "..", "llm", "data", "dev_databases")
-OUT = os.path.join(HERE, "outputs")
+DBR = os.path.join(HERE, "..", "..", "llm", "data", "dev_databases")
+OUT = os.path.join(HERE, "..", "outputs")
 CKPT = os.path.join(OUT, "m3_predict_340.json")
 ENGINE = "gpt-5.2"
 WORKERS = 8
@@ -23,7 +23,7 @@ lock = threading.Lock()
 
 
 def load_key():
-    for line in open(os.path.join(HERE, "..", "llm", "run", ".env")):
+    for line in open(os.path.join(HERE, "..", "..", "llm", "run", ".env")):
         if line.startswith("AIMLAPI_API_KEY"):
             return line.split("=", 1)[1].strip().strip('"').strip("'")
 

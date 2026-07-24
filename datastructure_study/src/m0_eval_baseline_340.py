@@ -17,7 +17,7 @@ ITER = 20  # VES iterations per query (official uses 100; 20 is stable enough an
 TIMEOUT = 30.0
 NCPU = 8
 
-ROOT = os.path.join(os.path.dirname(__file__), "..", "llm")
+ROOT = os.path.join(os.path.dirname(__file__), "..", "..", "llm")
 DB_ROOT = os.path.join(ROOT, "data", "dev_databases")
 DEV = os.path.join(ROOT, "data", "dev.json")
 GOLD = os.path.join(ROOT, "data", "dev_gold.sql")
@@ -137,7 +137,7 @@ def main():
                 rows[idx]["ves_" + tag] = res
         print(f"VES {tag} done", file=sys.stderr)
 
-    out_dir = os.path.join(os.path.dirname(__file__), "outputs")
+    out_dir = os.path.join(os.path.dirname(__file__), "..", "outputs")
     os.makedirs(out_dir, exist_ok=True)
     json.dump(rows, open(os.path.join(out_dir, "results_340.json"), "w"),
               indent=2, ensure_ascii=False)

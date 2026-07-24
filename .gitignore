@@ -28,6 +28,7 @@ datastructure_study/REPORT.md
 datastructure_study/docs/*
 !datastructure_study/docs/lit/
 !datastructure_study/docs/prof_brief.html
+!datastructure_study/docs/summary.html
 
 # subagent cross-session memory (local)
 datastructure_study/.claude/

@@ -13,12 +13,12 @@ import sqlglot
 from sqlglot import exp
 
 HERE = os.path.dirname(__file__)
-OUT = os.path.join(HERE, "outputs")
-DBR = os.path.join(HERE, "..", "llm", "data", "dev_databases")
+OUT = os.path.join(HERE, "..", "outputs")
+DBR = os.path.join(HERE, "..", "..", "llm", "data", "dev_databases")
 N = 340
 DBS = ["california_schools", "financial", "toxicology"]
 
-struct = {db: json.load(open(os.path.join(HERE, "structures", db + ".json"))) for db in DBS}
+struct = {db: json.load(open(os.path.join(HERE, "..", "structures", db + ".json"))) for db in DBS}
 # schema: {db: {table_lower: {col_lower: real_col}}}
 schema = {}
 for db, s in struct.items():

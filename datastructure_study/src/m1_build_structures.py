@@ -4,8 +4,8 @@ Pure local, zero token. Writes structures/<db>.json."""
 import sqlite3, json, os
 from collections import deque, defaultdict
 
-DBR = os.path.join(os.path.dirname(__file__), "..", "llm", "data", "dev_databases")
-OUT = os.path.join(os.path.dirname(__file__), "structures")
+DBR = os.path.join(os.path.dirname(__file__), "..", "..", "llm", "data", "dev_databases")
+OUT = os.path.join(os.path.dirname(__file__), "..", "structures")
 DBS = ["california_schools", "financial", "toxicology"]
 ENUM_MAX = 20
 

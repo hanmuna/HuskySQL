@@ -19,12 +19,17 @@ IR (JSON):
 Only `from` and `select` are required. `where/group_by/order_by/limit` are passed
 through (filters/values are the semantic part, not the structural one).
 """
+
 import re
 
 
 def q(ident):
     """quote one identifier part, leaving it bare if it is a plain word."""
-    return ident if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", ident) else '"' + ident.replace('"', '""') + '"'
+    return (
+        ident
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", ident)
+        else '"' + ident.replace('"', '""') + '"'
+    )
 
 
 def _q_part(p):
@@ -35,8 +40,10 @@ def _q_part(p):
     return q(p)
 
 
-_SIMPLE = re.compile(r'(`[^`]+`|"[^"]+"|\[[^\]]+\]|[A-Za-z_]\w*)'
-                     r'(\.(`[^`]+`|"[^"]+"|\[[^\]]+\]|[A-Za-z_]\w*))?$')
+_SIMPLE = re.compile(
+    r'(`[^`]+`|"[^"]+"|\[[^\]]+\]|[A-Za-z_]\w*)'
+    r'(\.(`[^`]+`|"[^"]+"|\[[^\]]+\]|[A-Za-z_]\w*))?$'
+)
 
 
 def is_simple_ref(s):
@@ -49,7 +56,7 @@ def qcol(tabcol):
     """'table.col' -> "table"."col"; pass through anything that isn't a plain ref."""
     if not is_simple_ref(tabcol):
         return tabcol
-    if "." in tabcol and not (tabcol[0] in '`"[' ):
+    if "." in tabcol and tabcol[0] not in '`"[':
         t, c = tabcol.split(".", 1)
         return f"{_q_part(t)}.{_q_part(c)}"
     return _q_part(tabcol)
@@ -57,9 +64,14 @@ def qcol(tabcol):
 
 def _tbl_alias(spec, alias=None):
     """Render a table reference with optional alias / self-join support.
-    Accepts a raw subquery ('(SELECT ...) x'), an inline 'atom AS atom2', or a
-    plain table name plus an optional separate alias."""
-    if "(" in spec:                       # raw subquery / expression, pass through
+    Accepts a raw subquery ('(SELECT ...) x'), an inline 'atom AS atom2', a
+    plain table name plus an optional separate alias, or a dict
+    {"table": ..., "as": ...} (some models emit nested table objects)."""
+    if isinstance(spec, dict):
+        return _tbl_alias(
+            spec.get("table") or spec.get("from"), spec.get("as") or alias
+        )
+    if "(" in spec:  # raw subquery / expression, pass through
         return spec
     m = re.split(r"\s+AS\s+|\s+", spec.strip(), maxsplit=1, flags=re.I)
     if len(m) == 2 and not alias:
@@ -67,12 +79,34 @@ def _tbl_alias(spec, alias=None):
     return q(spec) + (f" AS {q(alias)}" if alias else "")
 
 
+def _expr(x):
+    """A term in any expression position (GROUP BY / ORDER BY / join key / raw
+    clause). Accepts a plain string or a select-item-style dict (fn/expr forms,
+    which several models emit inside order_by/group_by); the alias is dropped
+    because it is illegal mid-expression."""
+    if isinstance(x, dict):
+        x = dict(x)
+        x.pop("as", None)
+        return _sel_item(x)
+    return _ref(x)
+
+
 def _ref(s):
     """A GROUP BY / ORDER BY term: a plain table.col is quoted, anything with an
     operator/space/backtick (e.g. a ratio) is passed through raw -> stays general."""
+    if isinstance(s, dict):
+        return _expr(s)
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?", s):
         return qcol(s)
     return s
+
+
+def _raw(x):
+    """A raw-SQL clause (where/having). Some models emit a dict here instead of
+    a string; unwrap its expr form."""
+    if isinstance(x, dict):
+        return x.get("expr") or _expr(x)
+    return x
 
 
 def _sel_item(it):
@@ -102,19 +136,22 @@ def ra_to_sql(ir):
     sql = f"SELECT {distinct}{sel} FROM {_tbl_alias(ir['from'])}"
     for j in ir.get("joins", []):
         on = j["on"]
-        pairs = on if isinstance(on[0], list) else [on]           # support multi-key joins
-        cond = " AND ".join(f"{qcol(l)} = {qcol(r)}" for l, r in pairs)
+        pairs = on if isinstance(on[0], list) else [on]  # support multi-key joins
+        cond = " AND ".join(f"{_expr(l)} = {_expr(r)}" for l, r in pairs)
         sql += f" JOIN {_tbl_alias(j['table'], j.get('as'))} ON {cond}"
     if ir.get("where"):
-        sql += f" WHERE {ir['where']}"
+        sql += f" WHERE {_raw(ir['where'])}"
     if ir.get("group_by"):
-        sql += " GROUP BY " + ", ".join(_ref(c) for c in ir["group_by"])
+        sql += " GROUP BY " + ", ".join(_expr(c) for c in ir["group_by"])
     if ir.get("having"):
-        sql += f" HAVING {ir['having']}"
+        sql += f" HAVING {_raw(ir['having'])}"
     if ir.get("order_by"):
         obs = []
         for o in ir["order_by"]:
-            obs.append(_ref(o["by"]) + (" DESC" if o.get("desc") else ""))
+            if not isinstance(o, dict) or "by" not in o:
+                obs.append(_expr(o))
+                continue
+            obs.append(_expr(o["by"]) + (" DESC" if o.get("desc") else ""))
         sql += " ORDER BY " + ", ".join(obs)
     if ir.get("limit") is not None:
         sql += f" LIMIT {int(ir['limit'])}"
@@ -123,35 +160,58 @@ def ra_to_sql(ir):
 
 # --- self-test: hand-encoded gold queries, compile -> execute -> compare to gold ---
 if __name__ == "__main__":
-    import os, sqlite3, json
-    DBR = os.path.join(os.path.dirname(__file__), "..", "llm", "data", "dev_databases")
+    import os
+    import sqlite3
+
+    DBR = os.path.join(
+        os.path.dirname(__file__), "..", "..", "llm", "data", "dev_databases"
+    )
 
     def run(db, sql):
         c = sqlite3.connect(os.path.join(DBR, db, db + ".sqlite")).cursor()
-        c.execute(sql); return set(c.fetchall())
+        c.execute(sql)
+        return set(c.fetchall())
 
     cases = [
         # idx6: magnet schools with >500 SAT takers
-        ("california_schools",
-         "SELECT T2.School FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode "
-         "WHERE T2.Magnet = 1 AND T1.NumTstTakr > 500",
-         {"from": "schools",
-          "joins": [{"table": "satscores", "on": ["schools.CDSCode", "satscores.cds"]}],
-          "select": ["schools.School"],
-          "where": "schools.Magnet = 1 AND satscores.NumTstTakr > 500"}),
+        (
+            "california_schools",
+            "SELECT T2.School FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode "
+            "WHERE T2.Magnet = 1 AND T1.NumTstTakr > 500",
+            {
+                "from": "schools",
+                "joins": [
+                    {"table": "satscores", "on": ["schools.CDSCode", "satscores.cds"]}
+                ],
+                "select": ["schools.School"],
+                "where": "schools.Magnet = 1 AND satscores.NumTstTakr > 500",
+            },
+        ),
         # idx16: count merged Alameda schools with <100 takers
-        ("california_schools",
-         "SELECT COUNT(T1.CDSCode) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds "
-         "WHERE T1.StatusType = 'Merged' AND T2.NumTstTakr < 100 AND T1.County = 'Alameda'",
-         {"from": "schools",
-          "joins": [{"table": "satscores", "on": ["schools.CDSCode", "satscores.cds"]}],
-          "select": [{"fn": "COUNT", "arg": "schools.CDSCode"}],
-          "where": "schools.StatusType = 'Merged' AND satscores.NumTstTakr < 100 AND schools.County = 'Alameda'"}),
+        (
+            "california_schools",
+            "SELECT COUNT(T1.CDSCode) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds "
+            "WHERE T1.StatusType = 'Merged' AND T2.NumTstTakr < 100 AND T1.County = 'Alameda'",
+            {
+                "from": "schools",
+                "joins": [
+                    {"table": "satscores", "on": ["schools.CDSCode", "satscores.cds"]}
+                ],
+                "select": [{"fn": "COUNT", "arg": "schools.CDSCode"}],
+                "where": "schools.StatusType = 'Merged' AND satscores.NumTstTakr < 100 AND schools.County = 'Alameda'",
+            },
+        ),
         # toxicology: distinct atoms that are carbon
-        ("toxicology",
-         "SELECT DISTINCT T1.atom_id FROM atom AS T1 WHERE T1.element = 'c'",
-         {"from": "atom", "distinct": True, "select": ["atom.atom_id"],
-          "where": "atom.element = 'c'"}),
+        (
+            "toxicology",
+            "SELECT DISTINCT T1.atom_id FROM atom AS T1 WHERE T1.element = 'c'",
+            {
+                "from": "atom",
+                "distinct": True,
+                "select": ["atom.atom_id"],
+                "where": "atom.element = 'c'",
+            },
+        ),
     ]
     ok = 0
     for db, gold, ir in cases:
