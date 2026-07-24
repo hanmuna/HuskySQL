@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(llm/.venv/bin/python *)",
+      "Bash(../llm/.venv/bin/python *)",
+      "Bash(.venv/bin/python *)",
+      "Bash(sqlite3 *)",
+      "Bash(uv pip *)",
+      "Bash(uv venv *)"
+    ]
+  },
+  "sandbox": {
+    "network": {
+      "allowedDomains": ["api.aimlapi.com"]
+    }
+  }
+}
