@@ -42,7 +42,7 @@ The dataset contains the main following resources:
   - `evidence`: the external knowledge evidence annotated by experts for assistance of models or SQL annotators.
   - `SQL`: SQLs annotated by crowdsource referring to database descriptions, database contents, to answer the questions accurately.
 - `ground-truth SQL file`: The SQL file should be stored at [`./llm/data/dev_gold.sql`](./llm/data/dev_gold.sql).
-- `llm`: It contains source codes to convert texts to SQLs by calling APIs from LLMs (currently set up for GPT-5.2 via the AI/ML API gateway), plus [`./llm/error_analysis/`](./llm/error_analysis/), a structured pipeline for generating, evaluating, and doing clause-level error analysis on full dev-set runs.
+- `llm`: It contains source codes to convert texts to SQLs by calling APIs from LLMs (currently set up for GPT-5.2 via the AI/ML API gateway).
 
 ## In-Context Learning (ICL):
 
@@ -63,21 +63,6 @@ Then you could directly execute the command line by following instructions (you 
 ```bash
 cd ./llm/
 sh ./run/run_gpt.sh
-```
-
-### Structured error analysis
-
-[`./llm/error_analysis/`](./llm/error_analysis/) runs the same generate → evaluate steps over the full dev set and adds clause-level structural diffing (predicted vs. gold SQL) plus an HTML report. See [`./llm/error_analysis/METHODOLOGY.md`](./llm/error_analysis/METHODOLOGY.md). Needs its own `./llm/error_analysis/.env` (`OPENAI_API_KEY` + `OPENAI_BASE_URL` pointed at the AI/ML API gateway) — see `.env.example` in that folder.
-
-```bash
-cd ./llm/
-.venv/bin/python error_analysis/01_generate.py   # --limit N for a smoke test
-.venv/bin/python error_analysis/02_evaluate.py
-.venv/bin/python error_analysis/03_analyze_wrong.py
-.venv/bin/python error_analysis/04_analyze_gold.py
-.venv/bin/python error_analysis/05_compare_report.py
-.venv/bin/python error_analysis/06_pairwise.py
-.venv/bin/python error_analysis/build_report.py  # -> error_analysis/report.html
 ```
 
 ## Evaluation:
