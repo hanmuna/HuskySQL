@@ -29,6 +29,12 @@ datastructure_study/docs/*
 !datastructure_study/docs/lit/
 !datastructure_study/docs/prof_brief.html
 !datastructure_study/docs/summary.html
+!datastructure_study/docs/report_plain.html
+!datastructure_study/docs/report.txt
+!datastructure_study/docs/method_flow.html
 
 # subagent cross-session memory (local)
 datastructure_study/.claude/
+
+# review reports written by the reviewer agents
+reviews/
