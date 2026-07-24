@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Weekly Research Brief — Compiled Minimal Projection for Text-to-SQL</title>
+<style>
+  :root{
+    --ink:#1c1a17; --muted:#6d675d; --paper:#fdfdfb; --rule:#ddd8cd;
+    --crimson:#8f1d21; --crimson-soft:#f7ecec;
+    --green:#2e6e3f; --green-lt:#93c1a0; --clay:#c4634f;
+    --serif:"Iowan Old Style",Palatino,Georgia,serif;
+    --sans:"Avenir Next","Helvetica Neue",Inter,Arial,sans-serif;
+    --cond:"Avenir Next Condensed","Arial Narrow",sans-serif;
+    --mono:"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{font:14px/1.45 var(--serif);color:var(--ink);background:var(--paper);
+       max-width:1600px;margin:26px auto;padding:0 26px}
+  .eyebrow{font:600 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;
+           color:var(--crimson)}
+  .mast{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;
+        border-bottom:3px solid var(--ink);padding-bottom:14px}
+  h1{font:700 27px/1.15 var(--serif);margin:6px 0 8px;letter-spacing:-.01em}
+  .thesis{font-size:15px;max-width:900px;color:var(--ink)}
+  .thesis .key{color:var(--crimson);font-weight:700}
+  .hero{text-align:right;white-space:nowrap}
+  .hero .nums{font:600 54px/1 var(--cond);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+  .hero .nums .to{color:var(--crimson)}
+  .hero .lbl{font:600 10.5px/1.5 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .meta{font:500 11.5px/1 var(--sans);color:var(--muted);letter-spacing:.02em;
+        border-bottom:1px solid var(--rule);padding:8px 0;margin-bottom:20px;
+        display:flex;gap:22px}
+  .grid{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:34px;align-items:start}
+  h2{font:700 15px/1.2 var(--serif);margin:0 0 10px;padding-top:8px;
+     border-top:3px solid var(--crimson)}
+  h2 .no{font:700 12px var(--sans);color:var(--crimson);margin-right:7px;letter-spacing:.08em}
+  .box{margin-bottom:26px}
+  table{border-collapse:collapse;width:100%;
+        font:500 12.5px/1.4 var(--sans);font-variant-numeric:tabular-nums}
+  th{font:600 10.5px/1.3 var(--sans);letter-spacing:.09em;text-transform:uppercase;
+     color:var(--muted);border-bottom:1.5px solid var(--ink);padding:4px 8px;text-align:right}
+  td{border-bottom:1px solid var(--rule);padding:5px 8px;text-align:right}
+  td.l,th.l{text-align:left}
+  tr.hl td{background:var(--crimson-soft);font-weight:600}
+  .pos{color:var(--green);font-weight:700}
+  .neg{color:var(--clay);font-weight:700}
+  .red{color:var(--crimson);font-weight:700}
+  .flow{font:12px/1.8 var(--mono);background:#f6f4ef;border:1px solid var(--rule);
+        border-radius:6px;padding:9px 12px}
+  .flow b{color:var(--crimson)}
+  .take{background:var(--crimson-soft);border-left:4px solid var(--crimson);
+        padding:10px 14px;font-size:13.5px}
+  .take b{color:var(--crimson)}
+  .chip{display:inline-block;font:600 12px/1 var(--sans);font-variant-numeric:tabular-nums;
+        background:#f3f1ea;border:1px solid var(--rule);border-radius:4px;
+        padding:5px 9px;margin:0 4px 6px 0}
+  .chip b{color:var(--crimson)}
+  .cap{font:500 11px/1.5 var(--sans);color:var(--muted);margin-top:4px}
+  svg{display:block;margin:8px 0;max-width:100%}
+  svg text{font-family:var(--sans);font-variant-numeric:tabular-nums}
+  @media print{body{margin:8px auto}}
+</style>
+</head>
+<body>
+
+<div class="mast">
+  <div>
+    <div class="eyebrow">Weekly research brief · BIRD text-to-SQL · Week of Jul 20, 2026</div>
+    <h1>Making Over-Selection Impossible:<br>Compiled Minimal Projection for Text-to-SQL</h1>
+    <div class="thesis">34% of the baseline's failures are <b>extra columns</b> — semantically right,
+    judged wrong. Emitting a JSON relational-algebra IR whose SELECT is an enumerated minimal list,
+    compiled deterministically, makes the error <span class="key">unrepresentable</span>.</div>
+  </div>
+  <div class="hero">
+    <div class="lbl">GPT-5.2 · execution accuracy</div>
+    <div class="nums">48.2 <span class="to">&rarr;</span> 57.9</div>
+    <div class="lbl">340-question dev slice · p = 5&times;10<sup>&minus;5</sup></div>
+  </div>
+</div>
+<div class="meta">
+  <span>1 LLM call / question</span><span>no training</span><span>compiler &asymp; 120 lines</span>
+  <span>closed API — no logits, so no constrained decoding</span><span>total cost &asymp; $75</span>
+</div>
+
+<div class="grid">
+
+<!-- ================= I MECHANISM ================= -->
+<div>
+  <div class="box">
+    <h2><span class="no">I</span>Method</h2>
+    <div class="flow">
+      question + live schema / FK / values<br>
+      &rarr;&nbsp; LLM emits JSON IR&nbsp; {from, joins, <b>select = [minimal list]</b>, where}<br>
+      &rarr;&nbsp; deterministic compiler &rarr; SQL
+    </div>
+  </div>
+
+  <div class="box">
+    <h2><span class="no">II</span>Why it works — 2&times;2 ablation</h2>
+    <table>
+      <tr><th class="l">arm (GPT-5.2)</th><th>EX</th><th>&Delta;</th><th>p</th></tr>
+      <tr><td class="l">baseline — free-form SQL</td><td>48.24</td><td>—</td><td>—</td></tr>
+      <tr><td class="l">IR format only</td><td>49.12</td><td>+0.88</td><td>ns</td></tr>
+      <tr><td class="l">instruction only</td><td>54.71</td><td>+6.47</td><td>9e-4</td></tr>
+      <tr class="hl"><td class="l">both — full method</td><td>57.94</td><td class="red">+9.71</td><td>5e-5</td></tr>
+    </table>
+    <svg width="380" height="100" viewBox="0 0 380 100">
+      <g font-size="11">
+        <text x="0" y="19" font-weight="600">base</text><rect x="64" y="9" width="193" height="12" fill="#cfc9bc"/><text x="262" y="19">48.2</text>
+        <text x="0" y="41" font-weight="600">+fmt</text><rect x="64" y="31" width="196" height="12" fill="#cfc9bc"/><text x="266" y="41">49.1</text>
+        <text x="0" y="63" font-weight="600">+instr</text><rect x="64" y="53" width="193" height="12" fill="#cfc9bc"/><rect x="257" y="53" width="26" height="12" fill="#b98a2e"/><text x="288" y="63">54.7</text>
+        <text x="0" y="85" font-weight="700">both</text><rect x="64" y="75" width="193" height="12" fill="#cfc9bc"/><rect x="257" y="75" width="39" height="12" fill="#8f1d21"/><text x="301" y="85" font-weight="700">57.9</text>
+        <line x1="257" y1="5" x2="257" y2="93" stroke="#9a948a" stroke-dasharray="3,3"/>
+      </g>
+    </svg>
+    <div class="cap">Instruction is best-effort (2/3 of the gain); the compiler is a guarantee. Interaction +2.36.</div>
+  </div>
+
+  <div class="box">
+    <h2><span class="no">III</span>Residual extra-column rate</h2>
+    <span class="chip">baseline <b>19.1%</b></span>
+    <span class="chip">instruction 2.9% — over-corrects</span>
+    <span class="chip">method <b>9.0%</b> — wrong declarations only; nothing slips past the list</span>
+  </div>
+</div>
+
+<!-- ================= II TRANSFER ================= -->
+<div>
+  <div class="box">
+    <h2><span class="no">IV</span>Five models, one protocol — each vs its own baseline</h2>
+    <table>
+      <tr><th class="l">model</th><th>base</th><th>method</th><th>&Delta;</th><th>IR ok</th></tr>
+      <tr><td class="l">GPT-4.1-mini</td><td>39.1</td><td>51.5</td><td class="pos">+12.4</td><td>100%</td></tr>
+      <tr><td class="l">GPT-5.2</td><td>48.2</td><td>57.9</td><td class="pos">+9.7</td><td>99.7%</td></tr>
+      <tr><td class="l">Claude Sonnet 4.5</td><td>54.7</td><td><b>61.2</b></td><td class="pos">+6.5</td><td>100%</td></tr>
+      <tr><td class="l">DeepSeek-chat</td><td>48.8</td><td>45.3</td><td class="neg">&minus;3.5</td><td>100%</td></tr>
+      <tr><td class="l">Qwen3-Coder-480B</td><td>54.1</td><td>51.2</td><td class="neg">&minus;2.9</td><td>99.4%</td></tr>
+    </table>
+    <svg width="600" height="168" viewBox="0 0 600 168">
+      <g font-size="11">
+        <text x="150" y="12" fill="#c4634f" font-weight="600">&#9664; harmed</text>
+        <text x="310" y="12" fill="#2e6e3f" font-weight="600">fixed &#9654;</text>
+        <line x1="300" y1="18" x2="300" y2="162" stroke="#9a948a"/>
+        <text x="0" y="38">GPT-4.1-mini</text>
+        <rect x="256" y="27" width="44" height="12" fill="#c4634f"/><rect x="300" y="27" width="42" height="12" fill="#2e6e3f"/><rect x="342" y="27" width="86" height="12" fill="#93c1a0"/>
+        <text x="434" y="38" font-weight="700" fill="#2e6e3f">+12.4</text>
+        <text x="0" y="67">GPT-5.2</text>
+        <rect x="268" y="56" width="32" height="12" fill="#c4634f"/><rect x="300" y="56" width="54" height="12" fill="#2e6e3f"/><rect x="354" y="56" width="44" height="12" fill="#93c1a0"/>
+        <text x="404" y="67" font-weight="700" fill="#2e6e3f">+9.7</text>
+        <text x="0" y="96">Sonnet 4.5</text>
+        <rect x="238" y="85" width="62" height="12" fill="#c4634f"/><rect x="300" y="85" width="46" height="12" fill="#2e6e3f"/><rect x="346" y="85" width="60" height="12" fill="#93c1a0"/>
+        <text x="412" y="96" font-weight="700" fill="#2e6e3f">+6.5</text>
+        <text x="0" y="125">DeepSeek-chat</text>
+        <rect x="210" y="114" width="90" height="12" fill="#c4634f"/><rect x="300" y="114" width="24" height="12" fill="#2e6e3f"/><rect x="324" y="114" width="42" height="12" fill="#93c1a0"/>
+        <text x="372" y="125" font-weight="700" fill="#c4634f">&minus;3.5</text>
+        <text x="0" y="154">Qwen3-Coder</text>
+        <rect x="208" y="143" width="92" height="12" fill="#c4634f"/><rect x="300" y="143" width="18" height="12" fill="#2e6e3f"/><rect x="318" y="143" width="54" height="12" fill="#93c1a0"/>
+        <text x="378" y="154" font-weight="700" fill="#c4634f">&minus;2.9</text>
+      </g>
+    </svg>
+    <div class="cap">Per-question flips. <b style="color:#2e6e3f">Dark green</b> — fixes inside the measured
+    over-selection bucket; <b style="color:#93c1a0">light</b> — other fixes; <b style="color:#c4634f">clay</b> —
+    format tax: the model writes different (wrong) filter logic when forced into the IR.</div>
+  </div>
+
+  <div class="take">
+    <b>Net effect = in-bucket benefit &minus; model-specific format tax.</b><br>
+    Two matched-strength pairs flip sign: Sonnet 54.7 / Qwen 54.1 &rarr; +6.5 / &minus;2.9;
+    GPT-5.2 48.2 / DeepSeek 48.8 &rarr; +9.7 / &minus;3.5. Headroom cannot flip a sign — the failure
+    profile and the tax can. <b>Measure first; constrain only what the diagnosis indicates.</b>
+  </div>
+</div>
+
+<!-- ================= III BOUNDARY ================= -->
+<div>
+  <div class="box">
+    <h2><span class="no">V</span>Boundary — zero-cost oracles</h2>
+    <table>
+      <tr><th class="l">candidate constraint</th><th>oracle</th><th class="l">verdict</th></tr>
+      <tr class="hl"><td class="l">minimal projection</td><td>+13.5 max</td><td class="l">realized <span class="red">+9.7</span> (72%)</td></tr>
+      <tr><td class="l">GROUP BY from functional deps</td><td>0 / 143</td><td class="l">nothing to fix</td></tr>
+      <tr><td class="l">WHERE-literal existence</td><td>2 / 85</td><td class="l">value errors are wrong <i>choice</i></td></tr>
+    </table>
+    <div class="cap">A clause is compiler-fixable iff derivable from schema + declared intent.
+    The zeros are the principle predicting its own boundary.</div>
+  </div>
+
+  <div class="box">
+    <h2><span class="no">VI</span>Statistics — exact McNemar</h2>
+    <span class="chip">method &gt; baseline <b>p = 5e-5</b></span>
+    <span class="chip">instruction &gt; baseline <b>p = 9e-4</b></span><br>
+    <span class="chip">format &asymp; baseline p = 0.80</span>
+    <span class="chip">method &gt; instruction (+3.2) <b>p = 0.17</b> at n = 340</span>
+    <div class="cap"><span class="red">Next step:</span> the hard-vs-soft gap needs the full
+    1534-question run to settle.</div>
+  </div>
+
+  <div class="box">
+    <h2><span class="no">VII</span>Setup</h2>
+    <div class="cap" style="font-size:11.5px">
+      BIRD dev 0–339 (california_schools, financial, toxicology) · EX = result-set equality, 30 s
+      timeout · identical prompt, IR spec and compiler for all five models · every paid run preceded
+      by a zero-cost oracle upper bound.
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
