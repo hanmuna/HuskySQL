@@ -19,7 +19,7 @@
   .eyebrow{font:600 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;
            color:var(--crimson)}
   .mast{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;
-        border-bottom:3px solid var(--ink);padding-bottom:14px}
+        border-bottom:3px solid var(--ink);padding-bottom:6px}
   h1{font:700 27px/1.15 var(--serif);margin:6px 0 8px;letter-spacing:-.01em}
   .thesis{font-size:15px;max-width:900px;color:var(--ink)}
   .thesis .key{color:var(--crimson);font-weight:700}
@@ -30,7 +30,7 @@
   .meta{font:500 11.5px/1 var(--sans);color:var(--muted);letter-spacing:.02em;
         border-bottom:1px solid var(--rule);padding:8px 0;margin-bottom:20px;
         display:flex;gap:22px}
-  .grid{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:34px;align-items:start}
+  .grid{display:grid;grid-template-columns:1.15fr 1.25fr 1fr;gap:34px;align-items:start;margin-top:24px}
   h2{font:700 15px/1.2 var(--serif);margin:0 0 10px;padding-top:8px;
      border-top:3px solid var(--crimson)}
   h2 .no{font:700 12px var(--sans);color:var(--crimson);margin-right:7px;letter-spacing:.08em}
@@ -45,9 +45,19 @@
   .pos{color:var(--green);font-weight:700}
   .neg{color:var(--clay);font-weight:700}
   .red{color:var(--crimson);font-weight:700}
-  .flow{font:12px/1.8 var(--mono);background:#f6f4ef;border:1px solid var(--rule);
-        border-radius:6px;padding:9px 12px}
-  .flow b{color:var(--crimson)}
+  .steps{font:13px/1.65 var(--serif);margin:0 0 10px;padding-left:0;list-style:none}
+  .steps li{margin-bottom:3px}
+  .steps .n{display:inline-block;font:700 11px/1.7 var(--sans);color:#fff;
+            background:var(--crimson);border-radius:50%;width:18px;height:18px;
+            text-align:center;margin-right:7px;vertical-align:1px}
+  .code{font:12px/1.65 var(--mono);background:#f6f4ef;border:1px solid var(--rule);
+        border-radius:6px;padding:11px 13px;white-space:pre;overflow-x:auto}
+  .code .k{color:#7a5b17}
+  .code .hl{background:var(--crimson-soft);color:var(--crimson);font-weight:700}
+  .code .cm{color:var(--muted)}
+  .vs{font:12px/1.6 var(--mono);margin-top:7px;padding:7px 13px;border-radius:6px}
+  .vs.good{background:#eef5ef;border-left:3px solid var(--green)}
+  .vs.bad{background:#f9efec;border-left:3px solid var(--clay);color:#7c4437}
   .take{background:var(--crimson-soft);border-left:4px solid var(--crimson);
         padding:10px 14px;font-size:13.5px}
   .take b{color:var(--crimson)}
@@ -67,19 +77,12 @@
   <div>
     <div class="eyebrow">Weekly research brief · BIRD text-to-SQL · Week of Jul 20, 2026</div>
     <h1>Making Over-Selection Impossible:<br>Compiled Minimal Projection for Text-to-SQL</h1>
-    <div class="thesis">34% of the baseline's failures are <b>extra columns</b> — semantically right,
-    judged wrong. Emitting a JSON relational-algebra IR whose SELECT is an enumerated minimal list,
-    compiled deterministically, makes the error <span class="key">unrepresentable</span>.</div>
   </div>
   <div class="hero">
     <div class="lbl">GPT-5.2 · execution accuracy</div>
     <div class="nums">48.2 <span class="to">&rarr;</span> 57.9</div>
     <div class="lbl">340-question dev slice · p = 5&times;10<sup>&minus;5</sup></div>
   </div>
-</div>
-<div class="meta">
-  <span>1 LLM call / question</span><span>no training</span><span>compiler &asymp; 120 lines</span>
-  <span>closed API — no logits, so no constrained decoding</span><span>total cost &asymp; $75</span>
 </div>
 
 <div class="grid">
@@ -88,11 +91,23 @@
 <div>
   <div class="box">
     <h2><span class="no">I</span>Method</h2>
-    <div class="flow">
-      question + live schema / FK / values<br>
-      &rarr;&nbsp; LLM emits JSON IR&nbsp; {from, joins, <b>select = [minimal list]</b>, where}<br>
-      &rarr;&nbsp; deterministic compiler &rarr; SQL
-    </div>
+    <ul class="steps">
+      <li><span class="n">1</span>Structures from each DB: schema DDL &middot; <b>FK join graph</b> &middot; <b>enum value index</b></li>
+      <li><span class="n">2</span>LLM answers with a relational-algebra IR, not SQL</li>
+      <li><span class="n">3</span>Compiler &rarr; SQL &middot; <b>only declared columns can appear</b></li>
+    </ul>
+    <div class="cap" style="margin-bottom:5px">Dev #6 — <i>&ldquo;magnet schools with &gt;500 SAT takers&rdquo;</i></div>
+    <div class="code">{
+  <span class="k">"from"</span>:   "satscores",
+  <span class="k">"joins"</span>:  [{"table": "schools",
+             "on": ["satscores.cds", "schools.CDSCode"]}],
+  <span class="hl">"select": ["schools.School"]</span>,  <span class="cm">&larr; enumerated, minimal</span>
+  <span class="k">"where"</span>:  "NumTstTakr &gt; 500 AND Magnet = 1",
+  <span class="k">"distinct"</span>: true
+}</div>
+    <div class="vs good">compiled &rarr; SELECT DISTINCT schools.School FROM &hellip; &nbsp;&check;</div>
+    <div class="vs bad">baseline &rarr; SELECT CDSCode, School, District, County, NumTstTakr &hellip; &nbsp;&#10007;</div>
+    <div class="cap">Closed API &rArr; no logits &rArr; the compiler replaces constrained decoding.</div>
   </div>
 
   <div class="box">
@@ -113,19 +128,20 @@
         <line x1="257" y1="5" x2="257" y2="93" stroke="#9a948a" stroke-dasharray="3,3"/>
       </g>
     </svg>
-    <div class="cap">Instruction is best-effort (2/3 of the gain); the compiler is a guarantee. Interaction +2.36.</div>
+    <div class="cap">instruction = best effort &middot; compiler = guarantee &middot; interaction +2.36</div>
   </div>
 
+</div>
+
+<!-- ================= II TRANSFER ================= -->
+<div>
   <div class="box">
     <h2><span class="no">III</span>Residual extra-column rate</h2>
     <span class="chip">baseline <b>19.1%</b></span>
     <span class="chip">instruction 2.9% — over-corrects</span>
     <span class="chip">method <b>9.0%</b> — wrong declarations only; nothing slips past the list</span>
   </div>
-</div>
 
-<!-- ================= II TRANSFER ================= -->
-<div>
   <div class="box">
     <h2><span class="no">IV</span>Five models, one protocol — each vs its own baseline</h2>
     <table>
@@ -158,16 +174,16 @@
         <text x="378" y="154" font-weight="700" fill="#c4634f">&minus;2.9</text>
       </g>
     </svg>
-    <div class="cap">Per-question flips. <b style="color:#2e6e3f">Dark green</b> — fixes inside the measured
-    over-selection bucket; <b style="color:#93c1a0">light</b> — other fixes; <b style="color:#c4634f">clay</b> —
-    format tax: the model writes different (wrong) filter logic when forced into the IR.</div>
+    <div class="cap"><b style="color:#2e6e3f">dark</b> = over-selection fixes &middot;
+    <b style="color:#93c1a0">light</b> = other fixes &middot;
+    <b style="color:#c4634f">clay</b> = format tax (semantic drift under the IR)</div>
   </div>
 
   <div class="take">
-    <b>Net effect = in-bucket benefit &minus; model-specific format tax.</b><br>
-    Two matched-strength pairs flip sign: Sonnet 54.7 / Qwen 54.1 &rarr; +6.5 / &minus;2.9;
-    GPT-5.2 48.2 / DeepSeek 48.8 &rarr; +9.7 / &minus;3.5. Headroom cannot flip a sign — the failure
-    profile and the tax can. <b>Measure first; constrain only what the diagnosis indicates.</b>
+    <b>net = in-bucket benefit &minus; model-specific format tax</b><br>
+    Matched-strength pairs flip sign — Sonnet 54.7 / Qwen 54.1 &rarr; <b>+6.5 / &minus;2.9</b>;
+    GPT-5.2 48.2 / DeepSeek 48.8 &rarr; <b>+9.7 / &minus;3.5</b> — headroom can't flip a sign.<br>
+    <b>Measure first; constrain only what the diagnosis indicates.</b>
   </div>
 </div>
 
@@ -181,8 +197,7 @@
       <tr><td class="l">GROUP BY from functional deps</td><td>0 / 143</td><td class="l">nothing to fix</td></tr>
       <tr><td class="l">WHERE-literal existence</td><td>2 / 85</td><td class="l">value errors are wrong <i>choice</i></td></tr>
     </table>
-    <div class="cap">A clause is compiler-fixable iff derivable from schema + declared intent.
-    The zeros are the principle predicting its own boundary.</div>
+    <div class="cap">compiler-fixable &hArr; derivable from schema + declared intent; the zeros predict the boundary</div>
   </div>
 
   <div class="box">
@@ -191,16 +206,14 @@
     <span class="chip">instruction &gt; baseline <b>p = 9e-4</b></span><br>
     <span class="chip">format &asymp; baseline p = 0.80</span>
     <span class="chip">method &gt; instruction (+3.2) <b>p = 0.17</b> at n = 340</span>
-    <div class="cap"><span class="red">Next step:</span> the hard-vs-soft gap needs the full
-    1534-question run to settle.</div>
+    <div class="cap"><span class="red">Next step:</span> full 1534-question run.</div>
   </div>
 
   <div class="box">
     <h2><span class="no">VII</span>Setup</h2>
     <div class="cap" style="font-size:11.5px">
-      BIRD dev 0–339 (california_schools, financial, toxicology) · EX = result-set equality, 30 s
-      timeout · identical prompt, IR spec and compiler for all five models · every paid run preceded
-      by a zero-cost oracle upper bound.
+      BIRD dev 0–339 · EX = result-set equality, 30 s timeout · identical prompt, IR and compiler
+      for all five models.
     </div>
   </div>
 </div>

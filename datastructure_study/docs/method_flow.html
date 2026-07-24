@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Method Flow</title>
+<style>
+  body{background:#fff;margin:40px;font-family:"Avenir Next","Helvetica Neue",Arial,sans-serif}
+</style>
+</head>
+<body>
+<svg width="1180" height="210" viewBox="0 0 1180 210" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L8,4.5 L0,9" fill="none" stroke="#1c1a17" stroke-width="1.6"/>
+    </marker>
+  </defs>
+  <g font-family="Avenir Next,Helvetica Neue,Arial,sans-serif">
+
+    <!-- Query -->
+    <rect x="10" y="60" width="150" height="64" rx="8" fill="#f3f1ea" stroke="#1c1a17" stroke-width="1.5"/>
+    <text x="85" y="88" text-anchor="middle" font-size="15" font-weight="600">Question</text>
+    <text x="85" y="107" text-anchor="middle" font-size="11.5" fill="#6d675d">natural language</text>
+
+    <!-- + DB context -->
+    <line x1="160" y1="92" x2="212" y2="92" stroke="#1c1a17" stroke-width="1.6" marker-end="url(#a)"/>
+    <rect x="216" y="46" width="188" height="92" rx="8" fill="#fff" stroke="#1c1a17" stroke-width="1.5"/>
+    <text x="310" y="70" text-anchor="middle" font-size="14" font-weight="600">+ DB context</text>
+    <text x="310" y="90" text-anchor="middle" font-size="11.5" fill="#6d675d">schema DDL</text>
+    <text x="310" y="106" text-anchor="middle" font-size="11.5" fill="#6d675d">FK join graph</text>
+    <text x="310" y="122" text-anchor="middle" font-size="11.5" fill="#6d675d">value hints</text>
+    <text x="310" y="152" text-anchor="middle" font-size="10.5" fill="#6d675d" font-style="italic">built live from the DB</text>
+
+    <!-- LLM -->
+    <line x1="404" y1="92" x2="456" y2="92" stroke="#1c1a17" stroke-width="1.6" marker-end="url(#a)"/>
+    <rect x="460" y="60" width="120" height="64" rx="32" fill="#1c1a17"/>
+    <text x="520" y="88" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">LLM</text>
+    <text x="520" y="106" text-anchor="middle" font-size="11" fill="#cfc9bc">one call</text>
+
+    <!-- IR -->
+    <line x1="580" y1="92" x2="632" y2="92" stroke="#1c1a17" stroke-width="1.6" marker-end="url(#a)"/>
+    <rect x="636" y="46" width="212" height="92" rx="8" fill="#f7ecec" stroke="#8f1d21" stroke-width="2"/>
+    <text x="742" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#8f1d21">RA-IR (JSON)</text>
+    <text x="742" y="92" text-anchor="middle" font-size="11.5" font-family="Menlo,monospace">{from, joins, where,</text>
+    <text x="742" y="110" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Menlo,monospace" fill="#8f1d21">select = [minimal list]}</text>
+    <text x="742" y="152" text-anchor="middle" font-size="10.5" fill="#6d675d" font-style="italic">the model's entire output</text>
+
+    <!-- Compiler -->
+    <line x1="848" y1="92" x2="900" y2="92" stroke="#1c1a17" stroke-width="1.6" marker-end="url(#a)"/>
+    <rect x="904" y="60" width="140" height="64" rx="8" fill="#fff" stroke="#1c1a17" stroke-width="1.5"/>
+    <text x="974" y="84" text-anchor="middle" font-size="14" font-weight="600">Compiler</text>
+    <text x="974" y="103" text-anchor="middle" font-size="11.5" fill="#6d675d">deterministic</text>
+    <text x="974" y="152" text-anchor="middle" font-size="10.5" fill="#8f1d21" font-weight="600">only declared columns</text>
+    <text x="974" y="166" text-anchor="middle" font-size="10.5" fill="#8f1d21" font-weight="600">can appear</text>
+
+    <!-- SQL -->
+    <line x1="1044" y1="92" x2="1096" y2="92" stroke="#1c1a17" stroke-width="1.6" marker-end="url(#a)"/>
+    <rect x="1100" y="60" width="70" height="64" rx="8" fill="#f3f1ea" stroke="#1c1a17" stroke-width="1.5"/>
+    <text x="1135" y="97" text-anchor="middle" font-size="15" font-weight="700">SQL</text>
+  </g>
+</svg>
+</body>
+</html>

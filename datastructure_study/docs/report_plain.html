@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Progress Report — Compiled Minimal Projection for Text-to-SQL</title>
+<style>
+  body{background:#f1f3f4;margin:0;padding:28px 0;font-family:Arial,Helvetica,sans-serif}
+  .page{background:#fff;max-width:816px;margin:0 auto;padding:72px 90px;
+        box-shadow:0 1px 3px rgba(0,0,0,.18);color:#202124;
+        font-size:11pt;line-height:1.6}
+  h1{font-size:20pt;font-weight:400;margin:0 0 4px}
+  .meta{color:#5f6368;font-size:10pt;margin-bottom:26px}
+  h2{font-size:13pt;font-weight:700;margin:22px 0 6px}
+  p{margin:0 0 10px}
+  b.r{color:#a50e0e}
+  ul{margin:0 0 10px 22px;padding:0}
+  li{margin-bottom:5px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Compiled Minimal Projection for Text-to-SQL</h1>
+<div class="meta">Progress report · BIRD dev slice (questions 0–339) · July 24, 2026</div>
+
+<h2>1. Problem</h2>
+<p>GPT-5.2 writing SQL directly scores 48.24 EX on the slice. Dissecting its 176 failures,
+the largest class (34%) is <b>over-selection</b>: the SQL is semantically right but returns
+extra columns, and BIRD's exact-match scoring counts it as wrong.</p>
+
+<h2>2. Method</h2>
+<p>Instead of free-form SQL, the model fills a JSON relational-algebra form whose SELECT is an
+enumerated minimal list, and a ~120-line deterministic compiler turns it into SQL — columns
+outside the list <b class="r">cannot appear by construction</b>. The API exposes no logits,
+so this post-hoc compiler stands in for constrained decoding.</p>
+
+<h2>3. Main result</h2>
+<p>EX rises from 48.24 to <b class="r">57.94 (+9.71, p = 5×10⁻⁵)</b>, fixing 27 of the 60
+over-selection failures — 72% of the zero-cost oracle upper bound computed before spending.</p>
+
+<h2>4. What carries the gain (ablations)</h2>
+<p><b>Format alone:</b> keeping the JSON form but dropping the minimality rule gives +0.88,
+statistically nothing — the format is not the active ingredient.</p>
+<p><b>Instruction alone:</b> a single "select only the asked columns" prompt line gives +6.47,
+so soft prompting gets two-thirds of the way; the compiled version is still 3.2 points better
+and, unlike the instruction, guarantees that nothing slips past the declared list.</p>
+
+<h2>5. Does it transfer? (five models)</h2>
+<p>The identical protocol on five models, each against its own baseline: GPT-4.1-mini
+<b class="r">+12.35</b>, GPT-5.2 <b class="r">+9.71</b>, Claude Sonnet 4.5 <b class="r">+6.47</b>
+(best absolute, 61.18), DeepSeek-chat −3.53, Qwen3-Coder −2.94; all five obey the IR format
+(≥99% parse and compile).</p>
+<p>Flip-level analysis explains the signs: <b>net effect = in-bucket benefit − a model-specific
+"format tax"</b> (semantic drift when forced into the IR); the two negative models pay 38–39
+drift losses versus 12–28 for the positive ones. Two matched-strength pairs (Sonnet 54.7 vs
+Qwen 54.1; GPT-5.2 48.2 vs DeepSeek 48.8) flip sign despite equal baselines, ruling out the
+"no headroom" explanation. <b class="r">Practical rule: measure a model's failure profile
+first; apply the constraint only where the diagnosis indicates.</b></p>
+
+<h2>6. Boundary checks (zero-cost)</h2>
+<p>Deriving GROUP BY from functional dependencies would fix 0 of 143 remaining failures —
+the models' GROUP BY already matches their SELECT. Checking WHERE literals against the database
+would fix only 2 of 85 value errors — those errors are wrong <i>choices</i>, not invalid values.
+Both zeros confirm the principle's scope: a clause is compiler-fixable only if derivable from
+schema plus declared intent.</p>
+
+<h2>7. Statistics</h2>
+<p>All comparisons use exact McNemar tests; the method beats baseline decisively (p = 5×10⁻⁵),
+while the hard-vs-soft gap (+3.2) is not yet significant at 340 questions (p = 0.17).</p>
+
+<h2>8. Next steps</h2>
+<ul>
+  <li><b>Full 1534-question dev run</b> (~$70): settles hard-vs-soft significance and produces a
+  leaderboard-comparable headline number.</li>
+  <li>Zero-cost add-ons: a small-sample "format-tax probe" (can 20 questions predict whether the
+  constraint will help a new model?); a DISTINCT-under-fanout oracle from FK cardinalities;
+  an escape-hatch usage census.</li>
+  <li>Write-up: first soft-vs-hard 2×2 on BIRD under a closed API; cross-model
+  prescribe-by-measurement analysis (both verified unclaimed in the literature).</li>
+</ul>
+
+<div class="meta" style="margin-top:24px">Setup: EX = result-set equality, 30 s timeout;
+identical prompt, IR and compiler across models; total experiment cost ≈ $75.</div>
+
+</div>
+</body>
+</html>

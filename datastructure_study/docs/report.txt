@@ -1,0 +1,19 @@
+METHOD
+- The LLM does not write SQL. It fills a JSON relational-algebra form (from / joins / select / where), where SELECT must be an enumerated minimal column list.
+- A ~120-line deterministic compiler turns the form into SQL. Columns outside the list cannot appear by construction.
+- (Why this design: the closed API exposes no logits, so constrained decoding is impossible; the post-generation compiler is its substitute.)
+
+RESULTS (BIRD dev 0-339, execution accuracy)
+- GPT-5.2: 48.24 -> 57.94 (+9.71, p = 5e-5). Fixes 27/60 of the over-selection failures; 72% of the pre-computed oracle upper bound.
+- Ablation A (JSON format only, no minimality rule): +0.88, statistically nothing. The format is not the active ingredient.
+- Ablation B (one "select only asked columns" prompt line, no IR): +6.47. Soft prompting gets 2/3 of the gain but guarantees nothing.
+- Five models, same protocol, each vs its own baseline: GPT-4.1-mini +12.35, GPT-5.2 +9.71, Sonnet 4.5 +6.47 (best absolute 61.18), DeepSeek-chat -3.53, Qwen3-Coder -2.94. All five obey the IR format (>=99% parse/compile).
+
+ANALYSIS
+- Net effect = in-bucket benefit - model-specific "format tax" (semantic drift when forced into the IR). The two negative models pay 38-39 drift losses vs 12-28 for the positive ones.
+- Two matched-strength pairs flip sign at equal baselines (Sonnet 54.7 vs Qwen 54.1; GPT-5.2 48.2 vs DeepSeek 48.8), so "no headroom" cannot explain the negatives. Rule: measure the model's failure profile first, constrain only what the diagnosis indicates.
+- Boundary checks: deriving GROUP BY fixes 0/143 remaining failures; validating WHERE literals fixes 2/85. A clause is compiler-fixable only if derivable from schema + declared intent.
+- Hard-vs-soft gap (+3.2) is not yet significant at n=340 (McNemar p = 0.17).
+
+NEXT
+- Full 1534-question dev run (~$70): settles hard-vs-soft and gives a leaderboard-comparable number.
