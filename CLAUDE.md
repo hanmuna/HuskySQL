@@ -97,3 +97,9 @@ How to orchestrate any new research thread in this repo:
 7. **Log** with `/exp-log`: update `STATUS.md` (and `REPORT.md` for full
    results) in Chinese, matching the existing doc style. Negative results get
    logged too — "M2 gain = 0" is one of the most useful facts in this repo.
+8. **Review before anything leaves the repo** (professor brief, draft, talk):
+   `blindspot` on fresh results before interpreting them, `referee2-reviewer`
+   on the claims, `claim-verify` once there are citations,
+   `reproducibility-auditor` before a handoff. See `.claude/agents/README.md`.
+   Paper writing itself goes through the `academic-research-skills` plugin
+   (`/ars-*` commands).
