@@ -23,13 +23,156 @@ through (filters/values are the semantic part, not the structural one).
 import re
 
 
+# SQLite keywords that BIRD schemas actually use as table or column names
+# (financial.`order` is the one that bites: unquoted it is a syntax error).
+RESERVED = {
+    "order",
+    "group",
+    "table",
+    "index",
+    "key",
+    "values",
+    "check",
+    "default",
+    "references",
+    "primary",
+    "foreign",
+    "unique",
+    "select",
+    "from",
+    "where",
+    "having",
+    "limit",
+    "offset",
+    "union",
+    "join",
+    "left",
+    "right",
+    "natural",
+    "cross",
+    "inner",
+    "outer",
+    "on",
+    "using",
+    "as",
+    "by",
+    "asc",
+    "desc",
+    "distinct",
+    "all",
+    "and",
+    "or",
+    "not",
+    "null",
+    "is",
+    "in",
+    "like",
+    "between",
+    "case",
+    "when",
+    "then",
+    "else",
+    "end",
+    "cast",
+    "collate",
+    "escape",
+    "exists",
+    "glob",
+    "match",
+    "regexp",
+    "transaction",
+    "commit",
+    "rollback",
+    "release",
+    "savepoint",
+    "begin",
+    "add",
+    "column",
+    "constraint",
+    "create",
+    "drop",
+    "alter",
+    "insert",
+    "update",
+    "delete",
+    "into",
+    "set",
+    "view",
+    "trigger",
+    "temp",
+    "temporary",
+    "if",
+    "for",
+    "each",
+    "row",
+    "before",
+    "after",
+    "instead",
+    "of",
+    "to",
+    "with",
+    "recursive",
+    "window",
+    "over",
+    "partition",
+    "filter",
+    "range",
+    "rows",
+    "groups",
+    "current",
+    "following",
+    "preceding",
+    "unbounded",
+    "exclude",
+    "others",
+    "ties",
+    "no",
+    "action",
+    "cascade",
+    "restrict",
+    "deferrable",
+    "initially",
+    "deferred",
+    "immediate",
+    "conflict",
+    "abort",
+    "fail",
+    "ignore",
+    "replace",
+    "do",
+    "nothing",
+    "returning",
+}
+
+
 def q(ident):
-    """quote one identifier part, leaving it bare if it is a plain word."""
+    """Quote one identifier part.
+
+    Plain words are left bare for readability, EXCEPT SQLite keywords: a bare
+    reserved word in an identifier position is a syntax error, and BIRD's
+    financial schema really does have a table called `order`.
+    """
     return (
         ident
         if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", ident)
+        and ident.lower() not in RESERVED
         else '"' + ident.replace('"', '""') + '"'
     )
+
+
+def quote_reserved_refs(sql, tables):
+    """Quote bare reserved-word table names in the raw-passthrough clauses.
+
+    `where` / `having` / `order_by` are emitted verbatim by design, so a model
+    writing `order.order_id = 1` slips a syntax error past the quoted FROM.
+    A keyword immediately followed by `.` is unambiguously an identifier, so
+    it is safe to quote every such occurrence.
+    """
+    for t in tables:
+        if t.lower() not in RESERVED:
+            continue
+        sql = re.sub(rf'(?<!["`\w.]){re.escape(t)}(?=\s*\.)', f'"{t}"', sql)
+    return sql
 
 
 def _q_part(p):
@@ -75,8 +218,8 @@ def _tbl_alias(spec, alias=None):
         return spec
     m = re.split(r"\s+AS\s+|\s+", spec.strip(), maxsplit=1, flags=re.I)
     if len(m) == 2 and not alias:
-        return f"{q(m[0])} AS {q(m[1])}"
-    return q(spec) + (f" AS {q(alias)}" if alias else "")
+        return f"{_q_part(m[0])} AS {_q_part(m[1])}"
+    return _q_part(spec) + (f" AS {_q_part(alias)}" if alias else "")
 
 
 def _expr(x):
@@ -155,7 +298,10 @@ def ra_to_sql(ir):
         sql += " ORDER BY " + ", ".join(obs)
     if ir.get("limit") is not None:
         sql += f" LIMIT {int(ir['limit'])}"
-    return sql
+    tables = [ir["from"]] + [j.get("table") for j in ir.get("joins", [])]
+    return quote_reserved_refs(
+        sql, [t for t in tables if isinstance(t, str) and t.isidentifier()]
+    )
 
 
 # --- self-test: hand-encoded gold queries, compile -> execute -> compare to gold ---
