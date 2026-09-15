@@ -20,7 +20,7 @@ Accepted prediction formats:
 Procedure:
 
 1. Write a throwaway eval script to $TMPDIR (do not commit it). Reuse the
-   exact EX semantics of `datastructure_study/src/m0_eval_baseline_340.py`: execute
+   exact EX semantics of `datastructure_study/src/m0_eval_baseline_340_or_full.py`: execute
    predicted and gold SQL on `llm/data/dev_databases/<db_id>/<db_id>.sqlite`,
    compare with `set()` equality, 30 s timeout via func_timeout, errors/
    timeouts count as 0. Gold and metadata come from

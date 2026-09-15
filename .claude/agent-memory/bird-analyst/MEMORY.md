@@ -1,0 +1,3 @@
+- [Gold-label noise: idx 16 california_schools](gold_noise_idx16.md) — question says "Alameda", gold filters County='Lake'
+- [Ablation-C zero-token bucket gate (join/value hints)](ablation_c_gate_2026-09-07.md) — join_mismatch 13, value_mismatch 7 of 174 fails, too small to justify 340 paid calls alone
+- [Heuristic recipe: table-set / literal-set diff via sqlglot](sqlglot_table_literal_diff_recipe.md) — reusable pattern for zero-token bucket gates

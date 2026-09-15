@@ -23,11 +23,12 @@ Core artifacts (all under `datastructure_study/`):
 - `outputs/m3_predict_340.json` — {idx: {ir, sql, ir_ok, compile_ok}}; the
   saved RA IR can be recompiled via `src/ra_to_sql.py` at zero cost.
 - `outputs/kg_taxonomy.json` / `kg_failure_detail.json` — failure buckets.
-- `structures/<db>.json` — FK graph, column profiles, enum value index.
+- `Other/structures/<db>.json` — FK graph, column profiles, enum value index
+  (lives outside `datastructure_study/`; not used by the main pipeline).
 - Databases: `llm/data/dev_databases/<db_id>/<db_id>.sqlite`.
 
 Rules:
-- EX = set equality of result rows, 30 s timeout (see `src/m0_eval_baseline_340.py`).
+- EX = set equality of result rows, 30 s timeout (see `src/m0_eval_baseline_340_or_full.py`).
   Reuse that logic; do not invent a different correctness metric.
 - Timeout flakiness: a query flipping near the 30 s boundary (idx 215
   historically) must be re-executed individually 2-3 times before you report

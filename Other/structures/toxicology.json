@@ -80,31 +80,50 @@
   "atom.atom_id": {
    "type": "TEXT",
    "pk": true,
-   "ndistinct": 12333,
+   "ndistinct": 9111,
    "enum": null
   },
   "atom.molecule_id": {
    "type": "TEXT",
    "pk": false,
-   "ndistinct": 444,
+   "ndistinct": 343,
    "enum": null
   },
   "atom.element": {
    "type": "TEXT",
    "pk": false,
-   "ndistinct": 21,
-   "enum": null
+   "ndistinct": 18,
+   "enum": [
+    "cl",
+    "c",
+    "h",
+    "o",
+    "s",
+    "n",
+    "p",
+    "na",
+    "br",
+    "f",
+    "i",
+    "sn",
+    "pb",
+    "ca",
+    "zn",
+    "k",
+    "cu",
+    "y"
+   ]
   },
   "bond.bond_id": {
    "type": "TEXT",
    "pk": true,
-   "ndistinct": 12379,
+   "ndistinct": 9156,
    "enum": null
   },
   "bond.molecule_id": {
    "type": "TEXT",
    "pk": false,
-   "ndistinct": 444,
+   "ndistinct": 343,
    "enum": null
   },
   "bond.bond_type": {
@@ -120,19 +139,19 @@
   "connected.atom_id": {
    "type": "TEXT",
    "pk": true,
-   "ndistinct": 12284,
+   "ndistinct": 9073,
    "enum": null
   },
   "connected.atom_id2": {
    "type": "TEXT",
    "pk": true,
-   "ndistinct": 12284,
+   "ndistinct": 9073,
    "enum": null
   },
   "connected.bond_id": {
    "type": "TEXT",
    "pk": false,
-   "ndistinct": 12379,
+   "ndistinct": 9156,
    "enum": null
   },
   "molecule.molecule_id": {
@@ -152,6 +171,60 @@
   }
  },
  "value_index": {
+  "cl": [
+   "atom.element"
+  ],
+  "c": [
+   "atom.element"
+  ],
+  "h": [
+   "atom.element"
+  ],
+  "o": [
+   "atom.element"
+  ],
+  "s": [
+   "atom.element"
+  ],
+  "n": [
+   "atom.element"
+  ],
+  "p": [
+   "atom.element"
+  ],
+  "na": [
+   "atom.element"
+  ],
+  "br": [
+   "atom.element"
+  ],
+  "f": [
+   "atom.element"
+  ],
+  "i": [
+   "atom.element"
+  ],
+  "sn": [
+   "atom.element"
+  ],
+  "pb": [
+   "atom.element"
+  ],
+  "ca": [
+   "atom.element"
+  ],
+  "zn": [
+   "atom.element"
+  ],
+  "k": [
+   "atom.element"
+  ],
+  "cu": [
+   "atom.element"
+  ],
+  "y": [
+   "atom.element"
+  ],
   "-": [
    "bond.bond_type",
    "molecule.label"

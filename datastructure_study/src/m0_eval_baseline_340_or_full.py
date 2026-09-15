@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
-"""Self-contained EX + VES evaluation of the FIRST 340 dev queries
-(california_schools + financial + toxicology, clean DB boundaries),
-for both the with-knowledge and without-knowledge baseline predictions.
+"""Self-contained EX + VES evaluation of the baseline dev predictions
+(with-knowledge and without-knowledge), for either the established FIRST 340
+dev queries (california_schools + financial + toxicology, clean DB
+boundaries) or the FULL dev set.
 
 Reuses the exact EX logic (set equality) and VES logic (sqrt(time_ratio)*100
 with outlier trimming) from llm/src/evaluation.py and evaluation_ves.py.
-No API calls — pure local sqlite execution. Run once; dumps results_340.json.
+No API calls — pure local sqlite execution.
+
+Usage: m0_eval_baseline_340.py [340|full]  (default: 340, legacy behavior,
+writes results_340.json unchanged). "full" processes every row in dev.json
+and writes results_full.json instead — it never touches results_340.json.
 """
 import os, sys, json, time, math, sqlite3
 import numpy as np
 import multiprocessing as mp
 from func_timeout import func_timeout, FunctionTimedOut
 
-N = 340
+TAG = sys.argv[1] if len(sys.argv) > 1 else "340"
+assert TAG in ("340", "full"), "usage: m0_eval_baseline_340.py [340|full]"
 ITER = 20  # VES iterations per query (official uses 100; 20 is stable enough and faster)
 TIMEOUT = 30.0
 NCPU = 8
@@ -23,6 +29,7 @@ DEV = os.path.join(ROOT, "data", "dev.json")
 GOLD = os.path.join(ROOT, "data", "dev_gold.sql")
 PRED_KG = os.path.join(ROOT, "exp_result", "gpt52_output_kg", "predict_dev.json")
 PRED_NOKG = os.path.join(ROOT, "exp_result", "gpt52_output", "predict_dev.json")
+OUT_NAME = "results_340.json" if TAG == "340" else "results_full.json"
 
 
 def db_path(db_id):
@@ -100,7 +107,9 @@ def ves_one(args):
 
 
 def main():
-    dev = json.load(open(DEV))[:N]
+    full_dev = json.load(open(DEV))
+    N = 340 if TAG == "340" else len(full_dev)
+    dev = full_dev[:N]
     gold_lines = open(GOLD).read().splitlines()
     gold = {}
     for i, line in enumerate(gold_lines[:N]):
@@ -139,7 +148,7 @@ def main():
 
     out_dir = os.path.join(os.path.dirname(__file__), "..", "outputs")
     os.makedirs(out_dir, exist_ok=True)
-    json.dump(rows, open(os.path.join(out_dir, "results_340.json"), "w"),
+    json.dump(rows, open(os.path.join(out_dir, OUT_NAME), "w"),
               indent=2, ensure_ascii=False)
 
     # ---- aggregates ----

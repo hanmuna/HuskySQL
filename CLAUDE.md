@@ -19,7 +19,7 @@ benchmark harness it builds on.
 - **Paid runs need explicit user approval**: anything that calls
   `connect_gpt` / the AIML API (~340+ calls per dev-slice run). State the
   estimated call count first.
-- Do not re-run `datastructure_study/src/m0_eval_baseline_340.py` — VES is slow and
+- Do not re-run `datastructure_study/src/m0_eval_baseline_340_or_full.py` — VES is slow and
   `outputs/results_340.json` already exists. EX-only re-evaluation is cheap
   (see `/eval340` skill).
 - `llm/src/*.py` has pre-existing Chinese comments — leave them unless asked.
@@ -67,10 +67,14 @@ Progress source of truth: `datastructure_study/STATUS.md`. Full numbers:
 - `datastructure_study/outputs/m3_predict_340.json` — per-question saved RA IR
   + compiled SQL (recompile with `src/ra_to_sql.py` at zero token)
 - `datastructure_study/outputs/kg_taxonomy.json` — failure bucket → idx list
-- `datastructure_study/structures/<db>.json` — FK graph / column profile /
-  enum value index (rebuild: `src/m1_build_structures.py`)
-- Python for all study scripts: `llm/.venv/bin/python` (study scripts live
-  in `datastructure_study/src/`; run them from inside `datastructure_study/`)
+- `Other/structures/<db>.json` — FK graph / column profile / enum value
+  index (rebuild: `Other/m1_build_structures.py`); not read by the main
+  pipeline (m0/m3), only by the not-yet-run Ablation C experiment
+- Python for all study scripts: `llm/.venv/bin/python` (main-pipeline scripts
+  live in `datastructure_study/src/` — run them from inside
+  `datastructure_study/`; retired/exploratory scripts, e.g. M1/M2/M4/M5,
+  `oracle_projection.py`, `xmodel_run.py`, `ablation_c_m1_hints.py`, live in
+  `Other/` and are not part of the main pipeline)
 
 ## Research workflow
 
@@ -80,8 +84,8 @@ How to orchestrate any new research thread in this repo:
    bucket it should fix, expected EX delta. If it can't name a bucket from
    `kg_taxonomy.json`, it isn't ready.
 2. **Zero-token upper bound.** Build an oracle over saved predictions/gold
-   (like `src/oracle_projection.py`) to bound the possible gain BEFORE spending
-   API calls. If the bound is small, stop here.
+   (like `Other/oracle_projection.py`) to bound the possible gain BEFORE
+   spending API calls. If the bound is small, stop here.
 3. **Literature check** → delegate to the `paper-scout` agent (runs on Fable,
    keeps its own cross-session memory of surveyed papers).
 4. **Failure/data analysis** → delegate to the `bird-analyst` agent so eval
