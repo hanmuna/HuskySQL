@@ -22,6 +22,8 @@ through (filters/values are the semantic part, not the structural one).
 
 import re
 
+from dialect_fix import normalize_sqlite
+
 
 # SQLite keywords that BIRD schemas actually use as table or column names
 # (financial.`order` is the one that bites: unquoted it is a syntax error).
@@ -299,9 +301,10 @@ def ra_to_sql(ir):
     if ir.get("limit") is not None:
         sql += f" LIMIT {int(ir['limit'])}"
     tables = [ir["from"]] + [j.get("table") for j in ir.get("joins", [])]
-    return quote_reserved_refs(
+    sql = quote_reserved_refs(
         sql, [t for t in tables if isinstance(t, str) and t.isidentifier()]
     )
+    return normalize_sqlite(sql)
 
 
 # --- self-test: hand-encoded gold queries, compile -> execute -> compare to gold ---
