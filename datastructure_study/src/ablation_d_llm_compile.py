@@ -90,13 +90,13 @@ def run_ex(db, pred, gold):
 def load_inputs():
     rows = json.load(open(os.path.join(OUT, f"results_{TAG}.json")))
     pred = json.load(open(os.path.join(OUT, f"m3_predict_{TAG}.json")))
-    m3_eval = json.load(open(os.path.join(OUT, f"m3_eval_{TAG}.json")))
+    recompiled = json.load(open(os.path.join(OUT, f"m3_recompiled_{TAG}.json")))
     jobs = []
     for r in rows:
         p = pred[str(r["idx"])]
         if p.get("ir_ok") and p.get("ir"):
             jobs.append((r, p["ir"]))
-    return rows, jobs, {int(k): v for k, v in m3_eval["m3"].items()}
+    return rows, jobs, {int(k): v["ex"] for k, v in recompiled.items()}
 
 
 def dry_run():
